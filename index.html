@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مساعد القدرات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #1e2329;
+      color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .navbar {
+      height: 56px;
+      background-color: #0d0f12;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #2a3038;
+    }
+    .navbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 8px 24px;
+      border-radius: 8px;
+      transition: background 0.2s;
+      user-select: none;
+    }
+    .navbar-title:hover { background: #2a3038; }
+
+    .main { display: flex; height: calc(100vh - 56px); }
+
+    /* Right Panel */
+    .panel-right {
+      width: 30%;
+      min-width: 280px;
+      max-width: 360px;
+      background-color: #1e2329;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      border-left: 1px solid #2a3038;
+      transition: all 0.3s ease;
+      overflow-y: auto;
+    }
+    .panel-right.sidebar-mode { justify-content: flex-start; padding-top: 20px; }
+
+    .avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00bcd4, #0d47a1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; margin-bottom: 32px; flex-shrink: 0;
+      box-shadow: 0 0 30px rgba(0,188,212,0.25);
+    }
+    .input-wrapper { width: 100%; position: relative; }
+    .input-field {
+      width: 100%; padding: 14px 20px; padding-left: 52px;
+      border-radius: 50px; border: 1px solid #3a424c;
+      background-color: #0d0f12; color: #fff;
+      font-family: 'Cairo', sans-serif; font-size: 15px; outline: none;
+    }
+    .input-field::placeholder { color: #6b7280; }
+    .input-field:focus { border-color: #00bcd4; }
+    .mic-btn {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; color: #6b7280;
+      font-size: 20px; cursor: pointer;
+    }
+    .mic-btn:hover { color: #00bcd4; }
+
+    /* Left Panel */
+    .panel-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 40px;
+      overflow-y: auto;
+      gap: 20px;
+    }
+
+    /* Welcome */
+    .welcome {
+      text-align: center;
+      max-width: 450px;
+    }
+    .welcome-icon { font-size: 72px; margin-bottom: 20px; }
+    .welcome-title { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+    .welcome-text { font-size: 16px; color: #9ca3af; line-height: 1.8; }
+
+    /* Question Card */
+    .question-card {
+      width: 100%;
+      max-width: 700px;
+      background-color: #0d0f12;
+      border-radius: 16px;
+      padding: 28px 32px;
+      border: 1px solid #2a3038;
+      display: none;
+    }
+    .question-card.visible { display: block; }
+    .question-label {
+      font-size: 13px; font-weight: 600; color: #00bcd4;
+      margin-bottom: 10px; letter-spacing: 1px;
+    }
+    .question-text {
+      font-size: 20px; font-weight: 600;
+      line-height: 1.7; color: #ffffff;
+    }
+
+    /* Options */
+    .options-grid {
+      width: 100%; max-width: 700px;
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .options-grid.visible { display: grid; }
+    .option-btn {
+      background-color: #0d0f12; border: 1px solid #2a3038;
+      border-radius: 12px; padding: 16px 20px;
+      color: #fff; font-family: 'Cairo', sans-serif;
+      font-size: 16px; font-weight: 500; cursor: pointer;
+      text-align: right; transition: all 0.2s;
+    }
+    .option-btn:hover { border-color: #00bcd4; background-color: #15191f; }
+    .option-btn.selected { border-color: #00bcd4; background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(13,71,161,0.15)); }
+    .option-btn.correct { border-color: #10b981; background: rgba(16,185,129,0.15); }
+    .option-btn.wrong { border-color: #ef4444; background: rgba(239,68,68,0.15); }
+    .option-btn:disabled { cursor: default; opacity: 0.85; }
+    /* عند التعطيل: نلغي تأثير الـ hover ونُبقي اللون حسب حالة الزر */
+    .option-btn:disabled:hover { border-color: #2a3038; background-color: #0d0f12; }
+    .option-btn.selected:disabled:hover { border-color: #00bcd4; background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(13,71,161,0.15)); }
+    .option-btn.correct:disabled:hover { border-color: #10b981; background: rgba(16,185,129,0.15); }
+    .option-btn.wrong:disabled:hover { border-color: #ef4444; background: rgba(239,68,68,0.15); }
+
+    /* Explanation */
+    .explanation-area {
+      width: 100%; max-width: 700px;
+      display: none;
+    }
+    .explanation-area.visible { display: block; }
+    .explanation-box {
+      background-color: rgba(13,15,18,0.6);
+      border-radius: 16px; padding: 24px 28px;
+      border: 1px solid #2a3038;
+    }
+    .shape-svg {
+      margin-top: 14px;
+      display: none;
+      justify-content: center;
+      background: #0a0c0e;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid #2a3038;
+    }
+    .shape-svg.visible { display: flex; }
+    .shape-svg svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .explanation-title { font-size: 14px; font-weight: 700; color: #00bcd4; margin-bottom: 8px; }
+    .explanation-result { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+    .explanation-result.correct-text { color: #10b981; }
+    .explanation-result.wrong-text { color: #ef4444; }
+    .explanation-ai {
+      font-size: 15px; line-height: 1.8; color: #d1d5db;
+      padding: 12px; background: #0d0f12; border-radius: 10px;
+      border-right: 3px solid #00bcd4;
+    }
+    .explanation-ai .placeholder { color: #6b7280; font-style: italic; }
+
+    /* Navigation */
+    .nav-controls {
+      width: 100%; max-width: 700px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-controls.visible { display: flex; }
+    .nav-btn {
+      background: #0d0f12; border: 1px solid #2a3038;
+      border-radius: 10px; padding: 10px 24px;
+      color: #e5e7eb; font-family: 'Cairo', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: #00bcd4; color: #00bcd4; }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .nav-btn:disabled:hover { border-color: #2a3038; color: #e5e7eb; }
+    .question-counter { font-size: 14px; color: #9ca3af; }
+
+    /* Sidebar */
+    .sidebar-content { width: 100%; display: none; flex-direction: column; gap: 8px; }
+    .panel-right.sidebar-mode .sidebar-content { display: flex; }
+    .panel-right.sidebar-mode .assistant-content { display: none; }
+    .back-btn {
+      background: none; border: none; color: #9ca3af;
+      font-family: 'Cairo', sans-serif; font-size: 14px;
+      cursor: pointer; padding: 6px 0; margin-bottom: 12px;
+      text-align: right; transition: color 0.2s;
+    }
+    .back-btn:hover { color: #00bcd4; }
+    .back-arrow { margin-left: 6px; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background-color: #2a3038; border-radius: 10px; padding: 14px 16px;
+      cursor: pointer; transition: background 0.2s; user-select: none;
+    }
+    .section-header:hover { background-color: #333b45; }
+    .section-header .label { font-size: 16px; font-weight: 700; }
+    .section-header .toggle-icon { font-size: 20px; color: #9ca3af; transition: transform 0.3s; font-weight: 300; }
+    .section-header.open .toggle-icon { transform: rotate(45deg); }
+    .sub-items { display: none; flex-direction: column; gap: 6px; padding-right: 16px; margin-top: 4px; }
+    .sub-items.open { display: flex; }
+    .sub-item {
+      background-color: #333b45; border-radius: 8px; padding: 10px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; cursor: pointer; transition: background 0.2s;
+    }
+    .sub-item:hover { background-color: #3d4652; }
+    .sub-item.active { border-right: 3px solid #00bcd4; background-color: #3d4652; }
+    .sub-item .name { color: #e5e7eb; font-weight: 500; }
+    .sub-item .count { color: #9ca3af; font-size: 13px; background-color: #1e2329; padding: 2px 10px; border-radius: 20px; }
+
+    .section-status { font-size: 13px; color: #6b7280; text-align: center; padding: 20px; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3a424c; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4a5560; }
+
+    /* ===== Responsive: تخطيط عمود واحد على الجوال ===== */
+    @media (max-width: 768px) {
+      body { overflow: auto; height: auto; min-height: 100vh; }
+      .main { flex-direction: column; height: auto; }
+      .panel-right {
+        width: 100%; max-width: none; min-width: 0;
+        border-left: none; border-bottom: 1px solid #2a3038;
+        padding: 20px;
+      }
+      .panel-left { padding: 24px 16px; }
+      .options-grid.visible { grid-template-columns: 1fr; }
+      .avatar { width: 90px; height: 90px; font-size: 36px; margin-bottom: 20px; }
+      .question-text { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="navbar-title" id="sectionsBtn">الاقسام</span>
+  </nav>
+
+  <div class="main">
+    <!-- Right Panel -->
+    <div class="panel-right" id="panelRight">
+      <div class="assistant-content" id="assistantContent">
+        <div class="avatar">🧠</div>
+        <div class="input-wrapper">
+          <label for="askInput" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">اسأل المساعد</label>
+          <input class="input-field" id="askInput" type="text" placeholder="إسأل" aria-label="اسأل المساعد">
+          <button class="mic-btn" type="button" aria-label="التسجيل الصوتي">🎤</button>
+        </div>
+      </div>
+      <div class="sidebar-content" id="sidebarContent">
+        <button class="back-btn" id="backBtn"><span class="back-arrow">←</span> رجوع</button>
+        <div class="section" data-section="quant">
+          <div class="section-header" data-target="quantSub">
+            <span class="label">كمي</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="sub-items" id="quantSub">
+            <div class="sub-item" data-section="engineering" data-count="83">
+              <span class="name">الهندسة</span>
+              <span class="count">83 سؤال</span>
+            </div>
+          </div>
+        </div>
+        <div class="section" data-section="verb">
+          <div class="section-header" data-target="verbSub">
+            <span class="label">لفظي</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="sub-items" id="verbSub">
+            <div class="sub-item" data-section="verbal-analogy" data-count="128">
+              <span class="name">التناظر اللفظي</span>
+              <span class="count">128 سؤال</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left Panel -->
+    <div class="panel-left" id="panelLeft">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">📚</div>
+        <div class="welcome-title">أهلاً بك في مساعد القدرات</div>
+        <div class="welcome-text">
+          اختر القسم الذي تريد التدرب عليه من قائمة "الأقسام" في الأعلى<br>
+          لتظهر لك الأسئلة وحاول الإجابة بنفسك أولاً
+        </div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="question-label" id="questionLabel">السؤال</div>
+        <div class="question-text" id="questionText"></div>
+        <div class="shape-svg" id="shapeSvg"></div>
+      </div>
+
+      <div class="options-grid" id="optionsGrid"></div>
+
+      <div class="explanation-area" id="explanationArea">
+        <div class="explanation-box">
+          <div class="explanation-title">نتيجتك</div>
+          <div class="explanation-result" id="explanationResult"></div>
+          <div class="explanation-ai" id="explanationAi">
+            <span class="placeholder">⟵ سيتم إضافة الشرح التفصيلي بالذكاء الاصطناعي قريباً ⟶</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-controls" id="navControls">
+        <button class="nav-btn" id="prevBtn">→ السابق</button>
+        <span class="question-counter" id="questionCounter">1 / 1</span>
+        <button class="nav-btn" id="nextBtn">التالي ←</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script>
+    // ===== إعدادات =====
+    // عنوان الخادم الوسيط (Proxy) الذي يحتفظ بمفتاح Gemini بأمان على الخادم.
+    // لا توجد أي مفاتيح API في كود المتصفح بعد الآن.
+    const EXPLAIN_ENDPOINT = '/api/explain';
+
+    // قراءة آمنة لمتغيرات الأسئلة القادمة من questions.js (تفادي ReferenceError)
+    const safeQuestions = (name) =>
+      (typeof window[name] !== 'undefined' && Array.isArray(window[name])) ? window[name] : [];
+
+    // ===== State =====
+    const sections = {
+      'verbal-analogy': { name: 'التناظر اللفظي', questions: safeQuestions('verbalAnalogyQuestions') },
+      'engineering':    { name: 'الهندسة',        questions: safeQuestions('engineeringQuestions') }
+    };
+
+    let currentSection = null;
+    let currentIndex = 0;
+    let answered = false;
+    let explainRequestId = 0; // لتجاهل ردود قديمة عند تغيير السؤال بسرعة
+
+    // ===== DOM refs =====
+    const panelRight = document.getElementById('panelRight');
+    const sectionsBtn = document.getElementById('sectionsBtn');
+    const backBtn = document.getElementById('backBtn');
+    const welcome = document.getElementById('welcome');
+    const questionCard = document.getElementById('questionCard');
+    const questionLabel = document.getElementById('questionLabel');
+    const questionText = document.getElementById('questionText');
+    const optionsGrid = document.getElementById('optionsGrid');
+    const explanationArea = document.getElementById('explanationArea');
+    const explanationResult = document.getElementById('explanationResult');
+    const explanationAi = document.getElementById('explanationAi');
+    const navControls = document.getElementById('navControls');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const questionCounter = document.getElementById('questionCounter');
+    const shapeSvg = document.getElementById('shapeSvg');
+
+    // ===== Accordion Toggle =====
+    document.querySelectorAll('.section-header').forEach(h => {
+      h.addEventListener('click', function() {
+        const target = document.getElementById(this.dataset.target);
+        if (!target) return;
+        target.classList.toggle('open');
+        this.classList.toggle('open');
+      });
+    });
+
+    // ===== Panel toggle =====
+    sectionsBtn.addEventListener('click', () => panelRight.classList.add('sidebar-mode'));
+    backBtn.addEventListener('click', () => panelRight.classList.remove('sidebar-mode'));
+
+    // ===== Load Section =====
+    document.querySelectorAll('.sub-item[data-section]').forEach(item => {
+      item.addEventListener('click', function() {
+        panelRight.classList.remove('sidebar-mode');
+        document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
+        this.classList.add('active');
+
+        const sectionKey = this.dataset.section;
+        const section = sections[sectionKey];
+        if (!section || !section.questions || section.questions.length === 0) {
+          welcome.style.display = 'block';
+          questionCard.classList.remove('visible');
+          optionsGrid.classList.remove('visible');
+          explanationArea.classList.remove('visible');
+          navControls.classList.remove('visible');
+          return;
+        }
+
+        currentSection = sectionKey;
+        currentIndex = 0;
+        showQuestion(currentIndex);
+      });
+    });
+
+    // ===== Show Question =====
+    function showQuestion(index) {
+      const section = sections[currentSection];
+      if (!section) return;
+
+      const q = section.questions[index];
+      if (!q) return;
+
+      welcome.style.display = 'none';
+      questionCard.classList.add('visible');
+      optionsGrid.classList.add('visible');
+      navControls.classList.add('visible');
+      explanationArea.classList.remove('visible');
+
+      answered = false;
+
+      questionLabel.textContent = `السؤال ${q.id}`;
+      questionText.textContent = q.stem;
+
+      // Shape SVG (محتوى موثوق من ملف الأسئلة الخاص بك)
+      if (q.shapeSVG) {
+        shapeSvg.innerHTML = q.shapeSVG;
+        shapeSvg.classList.add('visible');
+      } else {
+        shapeSvg.innerHTML = '';
+        shapeSvg.classList.remove('visible');
+      }
+
+      // Build options
+      optionsGrid.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.type = 'button';
+        btn.textContent = `${opt.l}) ${opt.t}`;
+        btn.dataset.index = i;
+        btn.addEventListener('click', () => selectOption(i));
+        optionsGrid.appendChild(btn);
+      });
+
+      // Navigation
+      questionCounter.textContent = `${index + 1} / ${section.questions.length}`;
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === section.questions.length - 1;
+    }
+
+    // ===== Select Option =====
+    function selectOption(index) {
+      if (answered) return;
+      answered = true;
+
+      const section = sections[currentSection];
+      const q = section.questions[currentIndex];
+      const buttons = optionsGrid.querySelectorAll('.option-btn');
+
+      if (q.answer === -1) {
+        buttons.forEach((btn, i) => {
+          btn.disabled = true;
+          if (i === index) btn.classList.add('selected');
+        });
+        explanationResult.textContent = '✅ تم اختيار الإجابة';
+        explanationResult.className = 'explanation-result correct-text';
+      } else {
+        buttons.forEach((btn, i) => {
+          btn.disabled = true;
+          if (i === q.answer) btn.classList.add('correct');
+          if (i === index && i !== q.answer) btn.classList.add('wrong');
+          if (i === index) btn.classList.add('selected');
+        });
+
+        const isCorrect = index === q.answer;
+        explanationResult.textContent = isCorrect ? '✅ إجابة صحيحة!' : '❌ إجابة خاطئة';
+        explanationResult.className = 'explanation-result ' + (isCorrect ? 'correct-text' : 'wrong-text');
+      }
+
+      explanationAi.innerHTML = `<span class="placeholder">⟵ جاري توليد الشرح ... ⟶</span>`;
+      explanationArea.classList.add('visible');
+
+      if (q.answer !== -1) {
+        const correctText = q.options[q.answer].t;
+        getExplanation(q.stem, correctText);
+      }
+    }
+
+    // ===== تهريب HTML لمنع الحقن من ردّ النموذج =====
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // تنسيق مبسّط (Markdown بسيط) بعد التهريب — آمن لأن الوسوم الوحيدة من عندنا
+    function formatExplanation(text) {
+      return escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+    }
+
+    // ===== جلب الشرح عبر الخادم الوسيط (بدون أي مفتاح في المتصفح) =====
+    async function getExplanation(question, correctOption) {
+      const reqId = ++explainRequestId;
+      try {
+        const response = await fetch(EXPLAIN_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, answer: correctOption })
+        });
+
+        if (reqId !== explainRequestId) return; // تجاهل ردّاً قديماً
+
+        if (!response.ok) {
+          let serverMsg = '';
+          try { const e = await response.json(); serverMsg = e && e.error ? e.error : ''; } catch (_) {}
+          let msg = 'عذراً، تعذّر تحميل الشرح.';
+          if (response.status === 429) msg = '⚠️ تم تجاوز حد الاستخدام، حاول بعد قليل.';
+          else if (response.status === 401 || response.status === 403) msg = '⚠️ مشكلة في إعداد المفتاح على الخادم.';
+          else if (response.status === 503) msg = '⚠️ الخدمة مشغولة حالياً، أعد المحاولة.';
+          const detail = serverMsg ? ` (${escapeHtml(serverMsg)})` : ` [HTTP ${response.status}]`;
+          explanationAi.innerHTML = `<span class="placeholder">${msg}${detail}</span>`;
+          return;
+        }
+
+        const data = await response.json();
+        if (reqId !== explainRequestId) return;
+
+        const explanation = (data && data.text) ? data.text : 'عذراً، لم يتم استلام شرح.';
+        explanationAi.innerHTML = formatExplanation(explanation);
+      } catch (error) {
+        if (reqId !== explainRequestId) return;
+        console.error('خطأ في جلب الشرح:', error);
+        explanationAi.innerHTML = `<span class="placeholder">🤖 تعذّر الاتصال بالخادم، انتظر قليلاً وأعد المحاولة.</span>`;
+      }
+    }
+
+    // ===== Navigation =====
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        showQuestion(currentIndex);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const section = sections[currentSection];
+      if (section && currentIndex < section.questions.length - 1) {
+        currentIndex++;
+        showQuestion(currentIndex);
+      }
+    });
+  </script>
+</body>
+</html>
