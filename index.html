@@ -79,6 +79,11 @@
     }
     .mic-btn:hover { color: #00bcd4; }
 
+    .assistant-hint {
+      font-size: 14px; color: #9ca3af; line-height: 1.8;
+      text-align: center; margin-bottom: 20px; max-width: 240px;
+    }
+
     /* Left Panel */
     .panel-left {
       flex: 1;
@@ -269,11 +274,9 @@
     <div class="panel-right" id="panelRight">
       <div class="assistant-content" id="assistantContent">
         <div class="avatar">🧠</div>
-        <div class="input-wrapper">
-          <label for="askInput" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">اسأل المساعد</label>
-          <input class="input-field" id="askInput" type="text" placeholder="إسأل" aria-label="اسأل المساعد">
-          <button class="mic-btn" type="button" aria-label="التسجيل الصوتي">🎤</button>
-        </div>
+        <p class="assistant-hint">اسألني أي سؤال عن القدرات — تحدّث بالمايك 🎤 أو اكتب ✍️ وسأجيبك بصوتي.</p>
+        <!-- وكيل ElevenLabs المحادثاتي: يوفّر المايك + شريط النص + الردّ الصوتي معاً -->
+        <elevenlabs-convai agent-id="ضع_AGENT_ID_هنا"></elevenlabs-convai>
       </div>
       <div class="sidebar-content" id="sidebarContent">
         <button class="back-btn" id="backBtn"><span class="back-arrow">←</span> رجوع</button>
@@ -340,6 +343,9 @@
       </div>
     </div>
   </div>
+
+  <!-- سكربت تضمين وكيل ElevenLabs المحادثاتي (يقرأ عنصر <elevenlabs-convai> أعلاه) -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 
   <script src="questions.js"></script>
   <script>
