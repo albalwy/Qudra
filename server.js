@@ -15,14 +15,39 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// المفتاح يُقرأ من البيئة فقط — لا يظهر أبداً في كود المتصفح
+// المفاتيح تُقرأ من البيئة فقط — لا تظهر أبداً في كود المتصفح
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+
+// إعدادات وكيل ElevenLabs المحادثاتي
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+const ELEVENLABS_AGENT_ID = process.env.ELEVENLABS_AGENT_ID;
 
 app.use(express.json({ limit: '16kb' }));
 
 // تقديم ملفات الواجهة (index.html و questions.js)
 app.use(express.static(path.join(__dirname)));
+
+// رابط موقّع لبدء محادثة وكيل ElevenLabs — المفتاح يبقى على الخادم
+app.get('/api/signed-url', async (req, res) => {
+  if (!ELEVENLABS_API_KEY || !ELEVENLABS_AGENT_ID) {
+    return res.status(500).json({ error: 'إعدادات ElevenLabs غير مكتملة على الخادم.' });
+  }
+  try {
+    const url = `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${ELEVENLABS_AGENT_ID}`;
+    const r = await fetch(url, { headers: { 'xi-api-key': ELEVENLABS_API_KEY } });
+    if (!r.ok) {
+      const errText = await r.text();
+      console.error('ElevenLabs signed-url error:', r.status, errText);
+      return res.status(r.status === 429 ? 429 : 502).json({ error: 'تعذّر بدء المحادثة.' });
+    }
+    const data = await r.json();
+    return res.json({ signedUrl: data.signed_url });
+  } catch (err) {
+    console.error('signed-url error:', err);
+    return res.status(502).json({ error: 'فشل الاتصال بـ ElevenLabs.' });
+  }
+});
 
 app.post('/api/explain', async (req, res) => {
   if (!GEMINI_API_KEY) {
