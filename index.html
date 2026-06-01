@@ -84,6 +84,35 @@
       text-align: center; margin-bottom: 20px; max-width: 240px;
     }
 
+    /* ===== واجهة المحادثة المدمجة (ElevenLabs SDK) ===== */
+    .assistant-content { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .assistant-status { font-size: 13px; color: #9ca3af; margin-bottom: 14px; text-align: center; min-height: 18px; }
+    .avatar.speaking { animation: avatarPulse 1s infinite; }
+    @keyframes avatarPulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(0,188,212,0.25); }
+      50%      { box-shadow: 0 0 50px rgba(0,188,212,0.7); }
+    }
+    .chat-log {
+      width: 100%; max-height: 38vh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
+    }
+    .chat-log:empty { display: none; }
+    .chat-msg { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; max-width: 92%; }
+    .chat-msg.user { align-self: flex-start; background: #2a3038; }
+    .chat-msg.ai {
+      align-self: flex-end;
+      background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(13,71,161,0.15));
+      border: 1px solid #00bcd4;
+    }
+    .conv-btn {
+      width: 100%; padding: 12px; border-radius: 50px; border: none;
+      background: linear-gradient(135deg, #00bcd4, #0d47a1); color: #fff;
+      font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 15px;
+      cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
+    }
+    .conv-btn:hover { opacity: 0.9; }
+    .conv-btn.active { background: #ef4444; }
+
     /* Left Panel */
     .panel-left {
       flex: 1;
@@ -273,10 +302,14 @@
     <!-- Right Panel -->
     <div class="panel-right" id="panelRight">
       <div class="assistant-content" id="assistantContent">
-        <div class="avatar">🧠</div>
-        <p class="assistant-hint">اسألني أي سؤال عن القدرات — تحدّث بالمايك 🎤 أو اكتب ✍️ وسأجيبك بصوتي.</p>
-        <!-- وكيل ElevenLabs المحادثاتي: يوفّر المايك + شريط النص + الردّ الصوتي معاً -->
-        <elevenlabs-convai agent-id="agent_1401kszkkh44fmks3s7x4t1h7a0v"></elevenlabs-convai>
+        <div class="avatar" id="assistantAvatar">🧠</div>
+        <div class="assistant-status" id="assistantStatus">اسألني أي سؤال عن القدرات</div>
+        <div class="chat-log" id="chatLog"></div>
+        <button class="conv-btn" id="convBtn" type="button">🎤 بدء المحادثة الصوتية</button>
+        <div class="input-wrapper">
+          <input class="input-field" id="askInput" type="text" placeholder="أو اكتب سؤالك هنا..." aria-label="اكتب سؤالك">
+          <button class="mic-btn" id="sendBtn" type="button" aria-label="إرسال">➤</button>
+        </div>
       </div>
       <div class="sidebar-content" id="sidebarContent">
         <button class="back-btn" id="backBtn"><span class="back-arrow">←</span> رجوع</button>
@@ -344,8 +377,78 @@
     </div>
   </div>
 
-  <!-- سكربت تضمين وكيل ElevenLabs المحادثاتي (يقرأ عنصر <elevenlabs-convai> أعلاه) -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+  <!-- وكيل ElevenLabs مدمج داخل النافذة عبر الـ SDK الرسمي -->
+  <script type="module">
+    import { Conversation } from 'https://cdn.jsdelivr.net/npm/@elevenlabs/client/+esm';
+
+    const convBtn    = document.getElementById('convBtn');
+    const sendBtn    = document.getElementById('sendBtn');
+    const askInput   = document.getElementById('askInput');
+    const chatLog    = document.getElementById('chatLog');
+    const statusEl   = document.getElementById('assistantStatus');
+    const avatarEl   = document.getElementById('assistantAvatar');
+
+    let conversation = null;
+
+    function addMsg(text, who) {
+      if (!text) return;
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (who === 'user' ? 'user' : 'ai');
+      div.textContent = text;
+      chatLog.appendChild(div);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // يطلب رابطاً موقّعاً من خادمنا (المفتاح يبقى مخفياً على الخادم)
+    async function getSignedUrl() {
+      const r = await fetch('/api/signed-url');
+      if (!r.ok) {
+        let e = ''; try { e = (await r.json()).error || ''; } catch (_) {}
+        throw new Error(e || ('HTTP ' + r.status));
+      }
+      return (await r.json()).signedUrl;
+    }
+
+    async function startConversation() {
+      if (conversation) return true;
+      try {
+        statusEl.textContent = 'جارٍ الاتصال...';
+        const signedUrl = await getSignedUrl();
+        conversation = await Conversation.startSession({
+          signedUrl,
+          onConnect:    () => { statusEl.textContent = '🟢 متصل — تحدّث أو اكتب'; convBtn.textContent = '⏹ إنهاء المحادثة'; convBtn.classList.add('active'); },
+          onDisconnect: () => { statusEl.textContent = 'انتهت المحادثة'; convBtn.textContent = '🎤 بدء المحادثة الصوتية'; convBtn.classList.remove('active'); avatarEl.classList.remove('speaking'); conversation = null; },
+          onError:      (msg) => { console.error('ElevenLabs:', msg); statusEl.textContent = '⚠️ حدث خطأ في المحادثة'; },
+          onModeChange: ({ mode }) => {
+            if (mode === 'speaking') { statusEl.textContent = '🔊 المساعد يتحدّث...'; avatarEl.classList.add('speaking'); }
+            else                     { statusEl.textContent = '🎧 يستمع إليك...';     avatarEl.classList.remove('speaking'); }
+          },
+          onMessage: ({ message, source }) => addMsg(message, source === 'user' ? 'user' : 'ai')
+        });
+        return true;
+      } catch (e) {
+        console.error('تعذّر بدء المحادثة:', e);
+        statusEl.textContent = '⚠️ تعذّر بدء المحادثة (' + e.message + ')';
+        conversation = null;
+        return false;
+      }
+    }
+
+    convBtn.addEventListener('click', async () => {
+      if (conversation) await conversation.endSession();
+      else await startConversation();
+    });
+
+    async function sendText() {
+      const text = askInput.value.trim();
+      if (!text) return;
+      if (!conversation && !(await startConversation())) return;
+      conversation.sendUserMessage(text);
+      askInput.value = '';
+    }
+    sendBtn.addEventListener('click', sendText);
+    askInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendText(); });
+  </script>
 
   <script src="questions.js"></script>
   <script>
