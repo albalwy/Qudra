@@ -319,9 +319,25 @@
             <span class="toggle-icon">+</span>
           </div>
           <div class="sub-items" id="quantSub">
-            <div class="sub-item" data-section="engineering" data-count="83">
+            <div class="sub-item" data-section="basic-operations" data-count="0">
+              <span class="name">العمليات الرياضية الأساسية</span>
+              <span class="count">قريباً</span>
+            </div>
+            <div class="sub-item" data-section="arithmetic" data-count="0">
+              <span class="name">الحساب</span>
+              <span class="count">قريباً</span>
+            </div>
+            <div class="sub-item" data-section="algebra" data-count="0">
+              <span class="name">الجبر</span>
+              <span class="count">قريباً</span>
+            </div>
+            <div class="sub-item" data-section="geometry" data-count="0">
               <span class="name">الهندسة</span>
-              <span class="count">83 سؤال</span>
+              <span class="count">قريباً</span>
+            </div>
+            <div class="sub-item" data-section="statistics" data-count="0">
+              <span class="name">الإحصاء</span>
+              <span class="count">قريباً</span>
             </div>
           </div>
         </div>
@@ -331,9 +347,25 @@
             <span class="toggle-icon">+</span>
           </div>
           <div class="sub-items" id="verbSub">
-            <div class="sub-item" data-section="verbal-analogy" data-count="128">
+            <div class="sub-item" data-section="sentence-completion" data-count="38">
+              <span class="name">إكمال الجملة</span>
+              <span class="count">38 سؤال</span>
+            </div>
+            <div class="sub-item" data-section="verbal-analogy" data-count="45">
               <span class="name">التناظر اللفظي</span>
-              <span class="count">128 سؤال</span>
+              <span class="count">45 سؤال</span>
+            </div>
+            <div class="sub-item" data-section="contextual-error" data-count="19">
+              <span class="name">الخطأ السياقي</span>
+              <span class="count">19 سؤال</span>
+            </div>
+            <div class="sub-item" data-section="odd-word" data-count="22">
+              <span class="name">المفردات الشاذة</span>
+              <span class="count">22 سؤال</span>
+            </div>
+            <div class="sub-item" data-section="mental-link" data-count="28">
+              <span class="name">الربط الذهني</span>
+              <span class="count">28 سؤال</span>
             </div>
           </div>
         </div>
@@ -409,6 +441,28 @@
       return (await r.json()).signedUrl;
     }
 
+    // ===== أداة جلب سؤال بالرقم والقسم من بيانات الموقع (questions.js) =====
+    function lookupQuestion(section, number) {
+      const s = String(section || '').trim();
+      const map = {
+        'إكمال الجملة': 'sentenceCompletionQuestions', 'اكمال الجملة': 'sentenceCompletionQuestions', 'إكمال': 'sentenceCompletionQuestions', 'sentence-completion': 'sentenceCompletionQuestions',
+        'التناظر اللفظي': 'verbalAnalogyQuestions', 'تناظر': 'verbalAnalogyQuestions', 'verbal-analogy': 'verbalAnalogyQuestions',
+        'الخطأ السياقي': 'contextualErrorQuestions', 'خطأ سياقي': 'contextualErrorQuestions', 'contextual-error': 'contextualErrorQuestions',
+        'المفردات الشاذة': 'oddWordQuestions', 'المفردة الشاذة': 'oddWordQuestions', 'الشاذة': 'oddWordQuestions', 'odd-word': 'oddWordQuestions',
+        'الربط الذهني': 'mentalLinkQuestions', 'ربط ذهني': 'mentalLinkQuestions', 'mental-link': 'mentalLinkQuestions'
+      };
+      const varName = map[s];
+      const arr = (varName && Array.isArray(window[varName])) ? window[varName] : null;
+      if (!arr) return 'لم أتعرّف على القسم. الأقسام المتاحة: إكمال الجملة، التناظر اللفظي، الخطأ السياقي، المفردات الشاذة، الربط الذهني.';
+
+      const q = arr.find(x => String(x.id) === String(number).trim());
+      if (!q) return `لا يوجد سؤال رقم ${number} في قسم ${s}.`;
+
+      const opts = (q.options || []).map(o => `${o.l}) ${o.t}`).join('، ');
+      const correct = (q.answer >= 0 && q.options[q.answer]) ? q.options[q.answer].t : 'غير محدّدة';
+      return `السؤال رقم ${q.id} (${s}): ${q.stem}\nالخيارات: ${opts}\nالإجابة الصحيحة: ${correct}`;
+    }
+
     async function startConversation() {
       if (conversation) return true;
       try {
@@ -416,6 +470,10 @@
         const signedUrl = await getSignedUrl();
         conversation = await Conversation.startSession({
           signedUrl,
+          // الأدوات التي يستطيع الوكيل استدعاؤها (يجب تعريف أداة بنفس الاسم في لوحة ElevenLabs)
+          clientTools: {
+            get_question: async ({ section, number }) => lookupQuestion(section, number)
+          },
           onConnect:    () => { statusEl.textContent = '🟢 متصل — تحدّث أو اكتب'; convBtn.textContent = '⏹ إنهاء المحادثة'; convBtn.classList.add('active'); },
           onDisconnect: () => { statusEl.textContent = 'انتهت المحادثة'; convBtn.textContent = '🎤 بدء المحادثة الصوتية'; convBtn.classList.remove('active'); avatarEl.classList.remove('speaking'); conversation = null; },
           onError:      (msg) => { console.error('ElevenLabs:', msg); statusEl.textContent = '⚠️ حدث خطأ في المحادثة'; },
@@ -463,8 +521,18 @@
 
     // ===== State =====
     const sections = {
-      'verbal-analogy': { name: 'التناظر اللفظي', questions: safeQuestions('verbalAnalogyQuestions') },
-      'engineering':    { name: 'الهندسة',        questions: safeQuestions('engineeringQuestions') }
+      // اللفظي
+      'sentence-completion': { name: 'إكمال الجملة',     questions: safeQuestions('sentenceCompletionQuestions') },
+      'verbal-analogy':      { name: 'التناظر اللفظي',   questions: safeQuestions('verbalAnalogyQuestions') },
+      'contextual-error':    { name: 'الخطأ السياقي',    questions: safeQuestions('contextualErrorQuestions') },
+      'odd-word':            { name: 'المفردات الشاذة',  questions: safeQuestions('oddWordQuestions') },
+      'mental-link':         { name: 'الربط الذهني',     questions: safeQuestions('mentalLinkQuestions') },
+      // الكمي (لم تُضف الأسئلة بعد)
+      'basic-operations':    { name: 'العمليات الرياضية الأساسية', questions: safeQuestions('basicOperationsQuestions') },
+      'arithmetic':          { name: 'الحساب',           questions: safeQuestions('arithmeticQuestions') },
+      'algebra':             { name: 'الجبر',            questions: safeQuestions('algebraQuestions') },
+      'geometry':            { name: 'الهندسة',          questions: safeQuestions('geometryQuestions') },
+      'statistics':          { name: 'الإحصاء',          questions: safeQuestions('statisticsQuestions') }
     };
 
     let currentSection = null;
@@ -514,6 +582,11 @@
         const sectionKey = this.dataset.section;
         const section = sections[sectionKey];
         if (!section || !section.questions || section.questions.length === 0) {
+          const sectionName = section ? section.name : 'هذا القسم';
+          welcome.innerHTML =
+            '<div class="welcome-icon">🛠️</div>' +
+            '<div class="welcome-title">نعتذر منك</div>' +
+            '<div class="welcome-text">أسئلة قسم «' + sectionName + '» لم تُضَف بعد،<br>وسيتم إضافتها قريباً بإذن الله 🌟</div>';
           welcome.style.display = 'block';
           questionCard.classList.remove('visible');
           optionsGrid.classList.remove('visible');
