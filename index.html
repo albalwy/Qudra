@@ -475,8 +475,13 @@
             get_question: async ({ section, number }) => lookupQuestion(section, number)
           },
           onConnect:    () => { statusEl.textContent = '🟢 متصل — تحدّث أو اكتب'; convBtn.textContent = '⏹ إنهاء المحادثة'; convBtn.classList.add('active'); },
-          onDisconnect: () => { statusEl.textContent = 'انتهت المحادثة'; convBtn.textContent = '🎤 بدء المحادثة الصوتية'; convBtn.classList.remove('active'); avatarEl.classList.remove('speaking'); conversation = null; },
-          onError:      (msg) => { console.error('ElevenLabs:', msg); statusEl.textContent = '⚠️ حدث خطأ في المحادثة'; },
+          onDisconnect: (details) => {
+            console.warn('ElevenLabs disconnected. السبب:', details);
+            const reason = details && (details.reason || (details.message) || (details.context && details.context.reason));
+            statusEl.textContent = reason ? ('انقطع الاتصال: ' + reason) : 'انتهت المحادثة';
+            convBtn.textContent = '🎤 بدء المحادثة الصوتية'; convBtn.classList.remove('active'); avatarEl.classList.remove('speaking'); conversation = null;
+          },
+          onError:      (msg, context) => { console.error('ElevenLabs error:', msg, context); statusEl.textContent = '⚠️ خطأ: ' + (msg || ''); },
           onModeChange: ({ mode }) => {
             if (mode === 'speaking') { statusEl.textContent = '🔊 المساعد يتحدّث...'; avatarEl.classList.add('speaking'); }
             else                     { statusEl.textContent = '🎧 يستمع إليك...';     avatarEl.classList.remove('speaking'); }
