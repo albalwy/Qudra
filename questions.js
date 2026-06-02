@@ -2,7 +2,7 @@
 // مولّد تلقائياً من مذكرة اللغة العربية. لا تُعدّل يدوياً إلا للضرورة.
 
 // اكمال الجملة — 38 سؤال
-const sentenceCompletionQuestions = [
+var sentenceCompletionQuestions = [
   { id: 1, stem: "الإنسان يُسخَّر علمه و _______ ليُبني حضارة.", options: [{ l: "أ", t: "علمه ـ قديمة" }, { l: "ب", t: "مستقبله ـ عالية" }, { l: "ج", t: "أخلاقه ـ شاهقة" }], answer: 1 },
   { id: 2, stem: "الماء _______ لا يطيب به.", options: [{ l: "أ", t: "الكدر ـ العيش" }, { l: "ب", t: "الصافي ـ الطعم" }, { l: "ج", t: "القراح ـ الهناء" }, { l: "د", t: "العذب ـ الارتواء" }], answer: 0 },
   { id: 3, stem: "الرعي _______ من _______ الأمور على البيئة.", options: [{ l: "أ", t: "غير الجائر ـ أضر" }, { l: "ب", t: "الجائر ـ أضر" }, { l: "ج", t: "الجائر ـ أهم" }, { l: "د", t: "الجائر ـ مفيد" }], answer: 1 },
@@ -44,7 +44,7 @@ const sentenceCompletionQuestions = [
 ];
 
 // التناظر اللفظي — 45 سؤال
-const verbalAnalogyQuestions = [
+var verbalAnalogyQuestions = [
   { id: 1, stem: "مدح : ثناء", options: [{ l: "أ", t: "شعر : نثر" }, { l: "ب", t: "عهد : وعد" }, { l: "ج", t: "صدق : كذب" }, { l: "د", t: "هرولة : مشي" }], answer: 0 },
   { id: 2, stem: "توجيه : إرشاد", options: [{ l: "أ", t: "عظة : تدبر" }, { l: "ب", t: "تقريب : إدناء" }, { l: "ج", t: "فحيح : ثعلب" }, { l: "د", t: "صوم : إفطار" }], answer: 1 },
   { id: 3, stem: "سعادة : بهجة", options: [{ l: "أ", t: "فرح : رضا" }, { l: "ب", t: "مرح : سخط" }, { l: "ج", t: "سرور : مسرّة" }, { l: "د", t: "سكين : قطع" }], answer: 2 },
@@ -93,7 +93,7 @@ const verbalAnalogyQuestions = [
 ];
 
 // الخطأ السياقي — 19 سؤال
-const contextualErrorQuestions = [
+var contextualErrorQuestions = [
   { id: 1, stem: "الإنسان المنظَّم هو من يفعل ما يشاء وقتما يشاء.", options: [{ l: "أ", t: "الإنسان" }, { l: "ب", t: "يفعل" }, { l: "ج", t: "المنظَّم" }, { l: "د", t: "وقتما" }], answer: 1 },
   { id: 2, stem: "بسبب أننا نجهل ثقافة غيرنا تكن نظرتنا لهم بريئة.", options: [{ l: "أ", t: "نجهل" }, { l: "ب", t: "غيرنا" }, { l: "ج", t: "نظرتنا" }, { l: "د", t: "بريئة" }], answer: 3 },
   { id: 3, stem: "يستطيع الإنسان الناجح أن يحوِّل الفشل إلى نجاح، كما نستطيع أن نجعل من الليمون الحامض عصيرًا حامضًا.", options: [{ l: "أ", t: "يستطيع" }, { l: "ب", t: "الناجح" }, { l: "ج", t: "الليمون" }, { l: "د", t: "حامضًا" }], answer: 3 },
@@ -116,7 +116,7 @@ const contextualErrorQuestions = [
 ];
 
 // المفردات الشاذة — 22 سؤال
-const oddWordQuestions = [
+var oddWordQuestions = [
   { id: 1, stem: "المشكاة ـ النبراس ـ التنور ـ المصباح", options: [{ l: "أ", t: "المشكاة" }, { l: "ب", t: "النبراس" }, { l: "ج", t: "التنور" }, { l: "د", t: "المصباح" }], answer: 2 },
   { id: 2, stem: "أبرم ـ غدر ـ نكث ـ نقض", options: [{ l: "أ", t: "أبرم" }, { l: "ب", t: "غدر" }, { l: "ج", t: "نكث" }, { l: "د", t: "نقض" }], answer: 0 },
   { id: 3, stem: "رضاعة ـ نسب ـ رحم ـ مصاهرة", options: [{ l: "أ", t: "رضاعة" }, { l: "ب", t: "نسب" }, { l: "ج", t: "رحم" }, { l: "د", t: "مصاهرة" }], answer: 0 },
@@ -142,7 +142,7 @@ const oddWordQuestions = [
 ];
 
 // الربط الذهني — 28 سؤال
-const mentalLinkQuestions = [
+var mentalLinkQuestions = [
   { id: 1, stem: "نبع الحنان", options: [{ l: "أ", t: "الأم" }, { l: "ب", t: "الأخت" }, { l: "ج", t: "الخالة" }, { l: "د", t: "الجدة" }], answer: 0 },
   { id: 2, stem: "حفد", options: [{ l: "أ", t: "جمل" }, { l: "ب", t: "أرنب" }, { l: "ج", t: "نمر" }, { l: "د", t: "أسد" }], answer: 1 },
   { id: 3, stem: "السياسة", options: [{ l: "أ", t: "الجوازات" }, { l: "ب", t: "وزارة الداخلية" }, { l: "ج", t: "وزارة الخارجية" }, { l: "د", t: "الجامعة" }], answer: 2 },
@@ -174,8 +174,8 @@ const mentalLinkQuestions = [
 ];
 
 // ===== القسم الكمي (الأسئلة لم تُضف بعد) =====
-const basicOperationsQuestions = [];
-const arithmeticQuestions = [];
-const algebraQuestions = [];
-const geometryQuestions = [];
-const statisticsQuestions = [];
+var basicOperationsQuestions = [];
+var arithmeticQuestions = [];
+var algebraQuestions = [];
+var geometryQuestions = [];
+var statisticsQuestions = [];
