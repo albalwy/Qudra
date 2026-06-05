@@ -337,9 +337,9 @@
               <span class="name">الحساب</span>
               <span class="count">قريباً</span>
             </div>
-            <div class="sub-item" data-section="algebra" data-count="0">
+            <div class="sub-item" data-section="algebra" data-count="35">
               <span class="name">الجبر</span>
-              <span class="count">قريباً</span>
+              <span class="count">35 سؤال</span>
             </div>
             <div class="sub-item" data-section="geometry" data-count="46">
               <span class="name">الهندسة</span>
@@ -460,7 +460,8 @@
         'الخطأ السياقي': 'contextualErrorQuestions', 'خطأ سياقي': 'contextualErrorQuestions', 'contextual-error': 'contextualErrorQuestions',
         'المفردات الشاذة': 'oddWordQuestions', 'المفردة الشاذة': 'oddWordQuestions', 'الشاذة': 'oddWordQuestions', 'odd-word': 'oddWordQuestions',
         'الربط الذهني': 'mentalLinkQuestions', 'ربط ذهني': 'mentalLinkQuestions', 'mental-link': 'mentalLinkQuestions',
-        'الهندسة': 'geometryQuestions', 'هندسة': 'geometryQuestions', 'geometry': 'geometryQuestions'
+        'الهندسة': 'geometryQuestions', 'هندسة': 'geometryQuestions', 'geometry': 'geometryQuestions',
+        'الجبر': 'algebraQuestions', 'جبر': 'algebraQuestions', 'algebra': 'algebraQuestions'
       };
       const varName = map[s];
       const arr = (varName && Array.isArray(window[varName])) ? window[varName] : null;
@@ -483,7 +484,11 @@
           signedUrl,
           // الأدوات التي يستطيع الوكيل استدعاؤها (يجب تعريف أداة بنفس الاسم في لوحة ElevenLabs)
           clientTools: {
-            get_question: async ({ section, number }) => lookupQuestion(section, number)
+            get_question: async ({ section, number }) => {
+              const result = lookupQuestion(section, number);
+              console.log('🔧 get_question called:', { section, number }, '=>', result);
+              return result;
+            }
           },
           onConnect:    () => { statusEl.textContent = '🟢 متصل — تحدّث أو اكتب'; convBtn.textContent = '⏹ إنهاء المحادثة'; convBtn.classList.add('active'); },
           onDisconnect: (details) => {
