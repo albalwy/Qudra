@@ -301,12 +301,96 @@
       .question-text { font-size: 18px; }
       .shape-svg img { width: 260px; height: 200px; }
     }
+
+    /* ===== شاشة الدخول ===== */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: radial-gradient(circle at 50% 30%, #1b2a3a 0%, #0d0f12 70%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; overflow-y: auto;
+    }
+    .auth-overlay.hidden { display: none; }
+    .auth-card {
+      width: 100%; max-width: 420px; text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .auth-logo {
+      width: 130px; height: 130px; border-radius: 50%;
+      background: linear-gradient(135deg, #00bcd4, #0d47a1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 60px; margin-bottom: 24px;
+      box-shadow: 0 0 40px rgba(0,188,212,0.35);
+      animation: logoFloat 3s ease-in-out infinite;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .auth-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-16px); }
+    }
+    .auth-title { font-size: 30px; font-weight: 800; margin-bottom: 14px; }
+    .auth-desc { font-size: 16px; color: #9ca3af; line-height: 1.9; margin-bottom: 32px; max-width: 360px; }
+    .auth-btn {
+      width: 100%; max-width: 320px; padding: 15px; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, #00bcd4, #0d47a1); color: #fff;
+      font-family: 'Cairo', sans-serif; font-size: 17px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    .auth-btn:hover { opacity: 0.92; }
+    .auth-btn:active { transform: scale(0.98); }
+    .auth-form { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 14px; }
+    .auth-input {
+      width: 100%; padding: 14px 20px; border-radius: 12px;
+      border: 1px solid #3a424c; background: #0d0f12; color: #fff;
+      font-family: 'Cairo', sans-serif; font-size: 15px; outline: none; text-align: right;
+    }
+    .auth-input:focus { border-color: #00bcd4; }
+    .auth-input::placeholder { color: #6b7280; }
+    .auth-error { color: #ef4444; font-size: 14px; min-height: 18px; }
+    .auth-back { background: none; border: none; color: #9ca3af; font-family: 'Cairo', sans-serif; font-size: 14px; cursor: pointer; margin-top: 6px; }
+    .auth-back:hover { color: #00bcd4; }
+    .logout-btn {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      background: none; border: 1px solid #2a3038; border-radius: 8px;
+      color: #9ca3af; font-family: 'Cairo', sans-serif; font-size: 13px;
+      padding: 6px 14px; cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
   </style>
 </head>
 <body>
 
+  <!-- ===== شاشة الدخول ===== -->
+  <div class="auth-overlay" id="authOverlay">
+    <!-- اللوحة الترحيبية -->
+    <div class="auth-card" id="landingPanel">
+      <div class="auth-logo" id="appLogo">🧠</div>
+      <div class="auth-title">مساعد القدرات</div>
+      <div class="auth-desc">
+        منصّتك الذكية للتدرّب على اختبار القدرات العامة — أسئلة كمية ولفظية مع تصحيح فوري،
+        وشرح بالذكاء الاصطناعي، ومساعد صوتي يجيبك في أي وقت.
+      </div>
+      <button class="auth-btn" id="goLoginBtn" type="button">تسجيل الدخول</button>
+    </div>
+
+    <!-- لوحة تسجيل الدخول -->
+    <div class="auth-card" id="loginPanel" style="display:none;">
+      <div class="auth-logo">🔐</div>
+      <div class="auth-title">تسجيل الدخول</div>
+      <div class="auth-desc">أدخل اسم المستخدم وكلمة المرور للدخول. إن كان اسم المستخدم جديداً سيُسجَّل تلقائياً.</div>
+      <form class="auth-form" id="loginForm">
+        <input class="auth-input" id="authUser" type="text" placeholder="اسم المستخدم" autocomplete="username" required>
+        <input class="auth-input" id="authPass" type="password" placeholder="كلمة المرور" autocomplete="current-password" required>
+        <div class="auth-error" id="authError"></div>
+        <button class="auth-btn" type="submit">دخول</button>
+        <button class="auth-back" id="authBackBtn" type="button">→ رجوع</button>
+      </form>
+    </div>
+  </div>
+
   <nav class="navbar">
     <span class="navbar-title" id="sectionsBtn">الاقسام</span>
+    <button class="logout-btn" id="logoutBtn" type="button">خروج</button>
   </nav>
 
   <div class="main">
@@ -776,6 +860,54 @@
         showQuestion(currentIndex);
       }
     });
+  </script>
+
+  <!-- ===== منطق شاشة الدخول (تخزين محلي بسيط) ===== -->
+  <script>
+    (function () {
+      const overlay = document.getElementById('authOverlay');
+      const landing = document.getElementById('landingPanel');
+      const loginP = document.getElementById('loginPanel');
+      const goLogin = document.getElementById('goLoginBtn');
+      const back = document.getElementById('authBackBtn');
+      const form = document.getElementById('loginForm');
+      const userI = document.getElementById('authUser');
+      const passI = document.getElementById('authPass');
+      const errEl = document.getElementById('authError');
+      const logout = document.getElementById('logoutBtn');
+
+      const USERS_KEY = 'qudraUsers';
+      const SESSION_KEY = 'qudraSession';
+      const getUsers = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; } };
+      const saveUsers = (u) => localStorage.setItem(USERS_KEY, JSON.stringify(u));
+
+      function enterApp() { overlay.classList.add('hidden'); if (logout) logout.style.display = 'block'; }
+      function showAuth() { overlay.classList.remove('hidden'); landing.style.display = 'flex'; loginP.style.display = 'none'; if (logout) logout.style.display = 'none'; }
+
+      // عند التحميل: ادخل مباشرة إن كان هناك جلسة محفوظة
+      if (localStorage.getItem(SESSION_KEY)) enterApp(); else showAuth();
+
+      goLogin && goLogin.addEventListener('click', () => { landing.style.display = 'none'; loginP.style.display = 'flex'; errEl.textContent = ''; userI.focus(); });
+      back && back.addEventListener('click', () => { loginP.style.display = 'none'; landing.style.display = 'flex'; });
+
+      form && form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const u = userI.value.trim();
+        const p = passI.value;
+        if (!u || !p) { errEl.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور.'; return; }
+        const users = getUsers();
+        if (users[u] === undefined) {            // مستخدم جديد → تسجيل
+          users[u] = p; saveUsers(users);
+        } else if (users[u] !== p) {             // موجود وكلمة مرور خاطئة
+          errEl.textContent = 'كلمة المرور غير صحيحة.'; return;
+        }
+        localStorage.setItem(SESSION_KEY, u);
+        errEl.textContent = ''; passI.value = '';
+        enterApp();
+      });
+
+      logout && logout.addEventListener('click', () => { localStorage.removeItem(SESSION_KEY); showAuth(); });
+    })();
   </script>
 </body>
 </html>
