@@ -371,7 +371,7 @@
   <div class="auth-overlay" id="authOverlay">
     <!-- اللوحة الترحيبية -->
     <div class="auth-card" id="landingPanel">
-      <div class="auth-logo" id="appLogo"><img src="logo.png" alt="مساعد القدرات"></div>
+<div class="auth-logo" id="appLogo"><img src="logo.png" alt="مساعد القدرات"></div>
       <div class="auth-title">مساعد القدرات</div>
       <div class="auth-desc">
         منصّتك الذكية للتدرّب على اختبار القدرات العامة — أسئلة كمية ولفظية مع تصحيح فوري،
@@ -422,12 +422,8 @@
           </div>
           <div class="sub-items" id="quantSub">
             <div class="sub-item" data-section="basic-operations" data-count="44">
-              <span class="name">العمليات الرياضية الأساسية</span>
-              <span class="count">44 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="arithmetic" data-count="0">
               <span class="name">الحساب</span>
-              <span class="count">قريباً</span>
+              <span class="count">44 سؤال</span>
             </div>
             <div class="sub-item" data-section="algebra" data-count="35">
               <span class="name">الجبر</span>
@@ -555,7 +551,7 @@
         'الهندسة': 'geometryQuestions', 'هندسة': 'geometryQuestions', 'geometry': 'geometryQuestions',
         'الجبر': 'algebraQuestions', 'جبر': 'algebraQuestions', 'algebra': 'algebraQuestions',
         'الإحصاء': 'statisticsQuestions', 'احصاء': 'statisticsQuestions', 'statistics': 'statisticsQuestions',
-        'العمليات الرياضية الأساسية': 'basicOperationsQuestions', 'العمليات الحسابية': 'basicOperationsQuestions', 'العمليات': 'basicOperationsQuestions', 'basic-operations': 'basicOperationsQuestions'
+        'الحساب': 'basicOperationsQuestions', 'العمليات الحسابية': 'basicOperationsQuestions', 'العمليات': 'basicOperationsQuestions', 'basic-operations': 'basicOperationsQuestions'
       };
       const varName = map[s];
       const arr = (varName && Array.isArray(window[varName])) ? window[varName] : null;
@@ -643,8 +639,7 @@
       'odd-word':            { name: 'المفردات الشاذة',  questions: safeQuestions('oddWordQuestions') },
       'mental-link':         { name: 'الربط الذهني',     questions: safeQuestions('mentalLinkQuestions') },
       // الكمي (لم تُضف الأسئلة بعد)
-      'basic-operations':    { name: 'العمليات الرياضية الأساسية', questions: safeQuestions('basicOperationsQuestions') },
-      'arithmetic':          { name: 'الحساب',           questions: safeQuestions('arithmeticQuestions') },
+      'basic-operations':    { name: 'الحساب', questions: safeQuestions('basicOperationsQuestions') },
       'algebra':             { name: 'الجبر',            questions: safeQuestions('algebraQuestions') },
       'geometry':            { name: 'الهندسة',          questions: safeQuestions('geometryQuestions') },
       'statistics':          { name: 'الإحصاء',          questions: safeQuestions('statisticsQuestions') }
