@@ -315,11 +315,11 @@
       display: flex; flex-direction: column; align-items: center;
     }
     .auth-logo {
-      width: 130px; height: 130px; border-radius: 50%;
-      background: linear-gradient(135deg, #00bcd4, #0d47a1);
+      width: 140px; height: 140px; border-radius: 50%;
+      background: #22262b;
       display: flex; align-items: center; justify-content: center;
       font-size: 60px; margin-bottom: 24px;
-      box-shadow: 0 0 40px rgba(0,188,212,0.35);
+      box-shadow: 0 0 45px rgba(0,188,212,0.30);
       animation: logoFloat 3s ease-in-out infinite;
       overflow: hidden; flex-shrink: 0;
     }
@@ -364,7 +364,31 @@
   <div class="auth-overlay" id="authOverlay">
     <!-- اللوحة الترحيبية -->
     <div class="auth-card" id="landingPanel">
-      <div class="auth-logo" id="appLogo">🧠</div>
+      <div class="auth-logo" id="appLogo">
+        <svg viewBox="0 0 200 200" width="78%" height="78%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="شعار مساعد القدرات">
+          <defs>
+            <linearGradient id="qg" x1="0.35" y1="0" x2="0.55" y2="1">
+              <stop offset="0" stop-color="#3df0ff"/>
+              <stop offset="0.5" stop-color="#1fc6e6"/>
+              <stop offset="1" stop-color="#1565ff"/>
+            </linearGradient>
+          </defs>
+          <g stroke="url(#qg)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <!-- محيط الرأس -->
+            <path d="M92 168 C64 166 52 146 56 120 C46 96 52 70 76 56 C96 44 124 44 142 58 C152 66 156 76 154 88 C153 96 161 100 162 108 C163 116 153 117 152 123 C151 130 159 131 156 139 C153 150 145 154 140 159 C133 166 121 166 111 166"/>
+            <!-- خطوط الرقبة -->
+            <path d="M104 166 C103 174 101 180 101 187"/>
+            <path d="M122 164 C126 173 132 177 139 179"/>
+            <!-- تلافيف الدماغ -->
+            <path d="M120 62 C133 60 139 71 132 80"/>
+            <path d="M74 80 C88 72 100 76 104 88"/>
+            <path d="M68 98 C82 91 94 95 98 105"/>
+            <path d="M70 116 C82 110 93 114 97 123"/>
+            <!-- الموجة الدماغية -->
+            <polyline points="62,110 80,110 88,110 97,80 105,134 113,52 121,146 129,80 137,110 150,110"/>
+          </g>
+        </svg>
+      </div>
       <div class="auth-title">مساعد القدرات</div>
       <div class="auth-desc">
         منصّتك الذكية للتدرّب على اختبار القدرات العامة — أسئلة كمية ولفظية مع تصحيح فوري،
