@@ -63,13 +63,13 @@
   .opt.correct{border-color:var(--green);background:rgba(34,197,94,.15);}
   .opt.wrong{border-color:var(--red);background:rgba(239,68,68,.15);}
   .opt:disabled{cursor:default;}
-  .checkrow{display:flex;align-items:flex-start;gap:22px;margin-top:24px;padding:20px 22px;border-radius:16px;border:1px solid var(--border);background:var(--surface);flex-wrap:wrap;}
+  .checkrow{display:flex;flex-direction:column;align-items:stretch;gap:16px;margin-top:24px;padding:20px 22px;border-radius:16px;border:1px solid var(--border);background:var(--surface);}
   .checkrow.correct{background:rgba(34,197,94,.10);border-color:var(--green);}
   .checkrow.wrong{background:rgba(239,68,68,.10);border-color:var(--red);}
-  .fb{flex:1;min-width:240px;}
+  .fb{width:100%;}
   .fb-title{font-weight:900;font-size:17px;margin-bottom:4px;}.fb-title.correct{color:var(--green);}.fb-title.wrong{color:var(--red);}
   .fb-ai{font-size:14px;color:var(--fg2);line-height:1.7;font-weight:600;}.fb-ai .ph{color:var(--muted);font-style:italic;}
-  .controls{display:flex;flex-direction:column;gap:10px;min-width:200px;}
+  .controls{display:flex;flex-direction:column;gap:10px;width:100%;}
   .nav2{display:flex;gap:10px;}
   .btn{font-family:'Cairo',sans-serif;font-weight:800;font-size:15px;cursor:pointer;border:none;border-radius:12px;padding:13px 24px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));transition:filter .15s,transform .08s;}
   .btn:hover{filter:brightness(1.07);}.btn:active{transform:translateY(1px);}
@@ -224,7 +224,7 @@
       progressFill.style.width=(solvedInSection(curKey)/s.q.length*100)+'%';
       checkbar.style.display='flex';
       prevBtn.disabled=(i===0);
-      nextBtn.disabled=!answered||(i===s.q.length-1);
+      nextBtn.disabled=(i===s.q.length-1);
       if(saved){renderFeedback(q,saved);checkBtn.textContent='✔ محلول';checkBtn.disabled=true;}
       else{checkbar.className='checkrow';feedback.style.display='none';checkBtn.textContent='تحقّق';checkBtn.disabled=true;}
       content.scrollTop=0;
