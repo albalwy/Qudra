@@ -5,910 +5,496 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مساعد القدرات</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Cairo', sans-serif;
-      background-color: #0d0f13;
-      color: #ffffff;
-      height: 100vh;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
+    :root{
+      --brand:#00bcd4; --brand-deep:#0a93ab;
+      --green:#58cc02; --green-deep:#58a700; --green-pale:#dbf8c5;
+      --red:#ff4b4b; --red-deep:#e63b3b; --red-pale:#ffdfe0;
+      --blue:#1cb0f6; --orange:#ff9600; --purple:#ce82ff;
+      --ink:#3c3c3c; --wolf:#777777; --hare:#afafaf;
+      --snow:#ffffff; --eel:#f7f7f7; --swan:#e5e5e5;
     }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      font-family:'Cairo',sans-serif;background:var(--snow);color:var(--ink);
+      min-height:100vh;-webkit-font-smoothing:antialiased;
+    }
+    .hidden{display:none !important;}
 
-    .navbar {
-      height: 56px;
-      background-color: #15181d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+    /* ===== 3D buttons ===== */
+    .btn{
+      font-family:'Cairo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;
+      border:none;border-radius:16px;padding:14px 22px;color:#fff;
+      background:var(--brand);box-shadow:0 4px 0 var(--brand-deep);
+      transition:transform .05s,box-shadow .05s,filter .15s;letter-spacing:.3px;
     }
-    .navbar-title {
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 8px 24px;
-      border-radius: 8px;
-      transition: background 0.2s;
-      user-select: none;
-    }
-    .navbar-title:hover { background: rgba(255,255,255,0.08); }
+    .btn:hover{filter:brightness(1.05);}
+    .btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--brand-deep);}
+    .btn:disabled{background:var(--swan);box-shadow:0 4px 0 #d0d0d0;color:#fff;cursor:default;}
+    .btn:disabled:active{transform:none;box-shadow:0 4px 0 #d0d0d0;}
+    .btn-green{background:var(--green);box-shadow:0 4px 0 var(--green-deep);}
+    .btn-green:active{box-shadow:0 0 0 var(--green-deep);}
+    .btn-red{background:var(--red);box-shadow:0 4px 0 var(--red-deep);}
+    .btn-ghost{background:#fff;color:var(--wolf);border:2px solid var(--swan);box-shadow:0 2px 0 var(--swan);}
 
-    .main { display: flex; height: calc(100vh - 56px); }
+    /* ===== Auth ===== */
+    .auth-overlay{position:fixed;inset:0;z-index:1000;background:var(--snow);
+      display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+    .auth-card{width:100%;max-width:420px;text-align:center;display:flex;flex-direction:column;align-items:center;}
+    .auth-logo{width:140px;height:140px;border-radius:50%;background:#0e1726;
+      display:flex;align-items:center;justify-content:center;margin-bottom:24px;
+      box-shadow:0 0 0 6px #eaf7fb;animation:float 3s ease-in-out infinite;overflow:hidden;}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    .auth-title{font-size:32px;font-weight:900;margin-bottom:14px;color:var(--ink);}
+    .auth-desc{font-size:16px;color:var(--wolf);line-height:1.9;margin-bottom:30px;max-width:360px;}
+    .auth-form{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px;}
+    .auth-input{width:100%;padding:15px 20px;border-radius:14px;border:2px solid var(--swan);
+      background:var(--eel);color:var(--ink);font-family:'Cairo',sans-serif;font-size:15px;
+      font-weight:600;outline:none;text-align:right;}
+    .auth-input:focus{border-color:var(--brand);background:#fff;}
+    .auth-input::placeholder{color:var(--hare);}
+    .auth-error{color:var(--red);font-size:14px;min-height:18px;font-weight:700;}
+    .auth-back{background:none;border:none;color:var(--wolf);font-family:'Cairo',sans-serif;
+      font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+    .wfull{width:100%;max-width:340px;}
 
-    /* Right Panel */
-    .panel-right {
-      width: 30%;
-      min-width: 280px;
-      max-width: 360px;
-      background-color: #0d0f13;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 20px;
-      border-left: 1px solid rgba(255,255,255,0.08);
-      transition: all 0.3s ease;
-      overflow-y: auto;
-    }
-    .panel-right.sidebar-mode { justify-content: flex-start; padding-top: 20px; }
+    /* ===== Header ===== */
+    .topbar{height:64px;border-bottom:2px solid var(--swan);display:flex;align-items:center;
+      justify-content:space-between;padding:0 18px;position:sticky;top:0;background:#fff;z-index:50;}
+    .brand-row{display:flex;align-items:center;gap:10px;}
+    .brand-mark{width:40px;height:40px;border-radius:50%;background:#0e1726;display:flex;
+      align-items:center;justify-content:center;overflow:hidden;}
+    .brand-name{font-weight:900;font-size:18px;color:var(--brand);}
+    .logout-btn{background:none;border:2px solid var(--swan);border-radius:12px;color:var(--wolf);
+      font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;padding:7px 14px;cursor:pointer;box-shadow:0 2px 0 var(--swan);}
 
-    .avatar {
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #00bcd4, #0d47a1);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 48px; margin-bottom: 32px; flex-shrink: 0;
-      box-shadow: 0 0 30px rgba(0,188,212,0.25);
-    }
-    .input-wrapper { width: 100%; position: relative; }
-    .input-field {
-      width: 100%; padding: 14px 20px; padding-left: 52px;
-      border-radius: 50px; border: 1px solid rgba(255,255,255,0.14);
-      background-color: #15181d; color: #fff;
-      font-family: 'Cairo', sans-serif; font-size: 15px; outline: none;
-    }
-    .input-field::placeholder { color: #6a6f78; }
-    .input-field:focus { border-color: #00bcd4; }
-    .mic-btn {
-      position: absolute; left: 14px; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none; color: #6a6f78;
-      font-size: 20px; cursor: pointer;
-    }
-    .mic-btn:hover { color: #00bcd4; }
+    /* ===== Home ===== */
+    .home{max-width:880px;margin:0 auto;padding:28px 18px 60px;}
+    .home-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#e7fafe,#eef6ff);
+      border:2px solid var(--swan);border-radius:20px;padding:20px 24px;margin-bottom:28px;}
+    .home-hero .big{font-size:22px;font-weight:900;margin-bottom:4px;}
+    .home-hero .sm{font-size:14px;color:var(--wolf);font-weight:600;}
+    .unit{margin-bottom:30px;}
+    .unit-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .unit-bar{height:10px;flex:1;border-radius:9999px;}
+    .unit-title{font-size:18px;font-weight:900;white-space:nowrap;}
+    .lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;}
+    .lesson{background:#fff;border:2px solid var(--swan);border-radius:18px;padding:18px 16px;
+      cursor:pointer;box-shadow:0 4px 0 var(--swan);transition:transform .05s,box-shadow .05s;
+      display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;}
+    .lesson:hover{transform:translateY(-2px);}
+    .lesson:active{transform:translateY(4px);box-shadow:0 0 0 var(--swan);}
+    .lesson.locked{opacity:.55;cursor:default;}
+    .lesson.locked:active{transform:none;box-shadow:0 4px 0 var(--swan);}
+    .lesson-ic{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:28px;color:#fff;}
+    .lesson-name{font-weight:800;font-size:15px;line-height:1.4;}
+    .lesson-count{font-size:12px;font-weight:700;color:var(--wolf);background:var(--eel);
+      padding:3px 12px;border-radius:9999px;}
 
-    .assistant-hint {
-      font-size: 14px; color: #8a8f98; line-height: 1.8;
-      text-align: center; margin-bottom: 20px; max-width: 240px;
-    }
+    /* ===== Quiz ===== */
+    .quiz{max-width:680px;margin:0 auto;padding:18px 16px 160px;}
+    .quiz-top{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+    .close-x{background:none;border:none;font-size:26px;color:var(--hare);cursor:pointer;font-weight:700;line-height:1;}
+    .progress{flex:1;height:16px;background:var(--swan);border-radius:9999px;overflow:hidden;}
+    .progress-fill{height:100%;background:var(--green);border-radius:9999px;width:0;transition:width .3s;}
+    .q-counter{font-size:13px;font-weight:800;color:var(--wolf);min-width:46px;text-align:center;}
+    .q-label{font-size:13px;font-weight:800;color:var(--brand);letter-spacing:1px;margin-bottom:10px;}
+    .q-text{font-size:22px;font-weight:800;line-height:1.7;white-space:pre-line;margin-bottom:18px;}
+    .q-img{display:none;justify-content:center;background:#fff;border:2px solid var(--swan);
+      border-radius:16px;padding:12px;margin-bottom:20px;}
+    .q-img.show{display:flex;}
+    .q-img img{width:320px;height:240px;max-width:100%;object-fit:contain;}
+    .opts{display:flex;flex-direction:column;gap:12px;}
+    .opt{background:#fff;border:2px solid var(--swan);border-radius:16px;padding:16px 20px;
+      font-family:'Cairo',sans-serif;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;
+      text-align:right;box-shadow:0 3px 0 var(--swan);transition:transform .05s,box-shadow .05s;}
+    .opt:hover{border-color:var(--brand);}
+    .opt:active{transform:translateY(3px);box-shadow:0 0 0 var(--swan);}
+    .opt.sel{border-color:var(--brand);background:#e9fbff;box-shadow:0 3px 0 var(--brand);color:var(--brand-deep);}
+    .opt.correct{border-color:var(--green);background:var(--green-pale);box-shadow:0 3px 0 var(--green-deep);color:var(--green-deep);}
+    .opt.wrong{border-color:var(--red);background:var(--red-pale);box-shadow:0 3px 0 var(--red-deep);color:var(--red-deep);}
+    .opt:disabled{cursor:default;}
+    .opt:disabled:active{transform:none;}
 
-    /* ===== واجهة المحادثة المدمجة (ElevenLabs SDK) ===== */
-    .assistant-content { width: 100%; display: flex; flex-direction: column; align-items: center; }
-    .assistant-status { font-size: 13px; color: #8a8f98; margin-bottom: 14px; text-align: center; min-height: 18px; }
-    .avatar.speaking { animation: avatarPulse 1s infinite; }
-    @keyframes avatarPulse {
-      0%, 100% { box-shadow: 0 0 30px rgba(0,188,212,0.25); }
-      50%      { box-shadow: 0 0 50px rgba(0,188,212,0.7); }
-    }
-    .chat-log {
-      width: 100%; max-height: 38vh; overflow-y: auto;
-      display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
-    }
-    .chat-log:empty { display: none; }
-    .chat-msg { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; max-width: 92%; }
-    .chat-msg.user { align-self: flex-start; background: rgba(255,255,255,0.08); }
-    .chat-msg.ai {
-      align-self: flex-end;
-      background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(13,71,161,0.15));
-      border: 1px solid #00bcd4;
-    }
-    .conv-btn {
-      width: 100%; padding: 12px; border-radius: 50px; border: none;
-      background: linear-gradient(135deg, #00bcd4, #0d47a1); color: #fff;
-      font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 15px;
-      cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s, transform 0.1s;
-      box-shadow: 0 6px 16px rgba(0,188,212,0.18);
-    }
-    .conv-btn:hover { opacity: 0.92; }
-    .conv-btn:active { transform: scale(0.99); }
-    .conv-btn.active { background: #ef4444; }
+    /* ===== Check bar ===== */
+    .checkbar{position:fixed;left:0;right:0;bottom:0;border-top:2px solid var(--swan);background:#fff;
+      padding:16px 18px;z-index:60;transition:background .2s;}
+    .checkbar.correct{background:var(--green-pale);border-top-color:var(--green);}
+    .checkbar.wrong{background:var(--red-pale);border-top-color:var(--red);}
+    .checkbar-in{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;}
+    .feedback{flex:1;min-width:220px;}
+    .feedback-title{font-weight:900;font-size:18px;margin-bottom:4px;}
+    .feedback-title.correct{color:var(--green-deep);}
+    .feedback-title.wrong{color:var(--red-deep);}
+    .feedback-ai{font-size:14px;color:var(--ink);line-height:1.7;font-weight:600;}
+    .feedback-ai .ph{color:var(--wolf);font-style:italic;}
 
-    /* Left Panel */
-    .panel-left {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 40px;
-      overflow-y: auto;
-      gap: 20px;
-    }
+    /* ===== Assistant FAB + modal ===== */
+    .fab{position:fixed;bottom:88px;left:20px;width:62px;height:62px;border-radius:50%;
+      background:#0e1726;border:none;cursor:pointer;z-index:70;box-shadow:0 6px 18px rgba(0,0,0,.25);
+      display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .fab:hover{filter:brightness(1.1);}
+    .assistant-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.4);
+      display:none;align-items:flex-end;justify-content:center;}
+    .assistant-modal.show{display:flex;}
+    .assistant-sheet{width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;
+      padding:20px;max-height:80vh;display:flex;flex-direction:column;}
+    .as-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+    .as-avatar{width:48px;height:48px;border-radius:50%;background:#0e1726;display:flex;
+      align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+    .as-avatar.speaking{animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,188,212,.4)}50%{box-shadow:0 0 0 10px rgba(0,188,212,0)}}
+    .as-title{font-weight:900;font-size:16px;}
+    .as-status{font-size:12px;color:var(--wolf);font-weight:700;}
+    .as-close{margin-inline-start:auto;background:none;border:none;font-size:24px;color:var(--hare);cursor:pointer;}
+    .chat-log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px;min-height:80px;}
+    .chat-msg{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.7;max-width:90%;font-weight:600;}
+    .chat-msg.user{align-self:flex-start;background:var(--eel);}
+    .chat-msg.ai{align-self:flex-end;background:#e9fbff;border:2px solid var(--brand);}
+    .as-input-row{display:flex;gap:8px;}
+    .as-input{flex:1;padding:13px 16px;border-radius:14px;border:2px solid var(--swan);
+      background:var(--eel);font-family:'Cairo',sans-serif;font-weight:600;outline:none;text-align:right;}
+    .as-input:focus{border-color:var(--brand);background:#fff;}
+    .icon-btn{border:none;border-radius:14px;padding:0 16px;font-size:18px;cursor:pointer;color:#fff;font-weight:800;}
 
-    /* Welcome */
-    .welcome {
-      text-align: center;
-      max-width: 450px;
-    }
-    .welcome-icon { font-size: 72px; margin-bottom: 20px; }
-    .welcome-title { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
-    .welcome-text { font-size: 16px; color: #8a8f98; line-height: 1.8; }
+    .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;
+      font-weight:800;padding:14px 26px;border-radius:9999px;box-shadow:0 6px 18px rgba(0,0,0,.2);
+      z-index:300;opacity:0;transition:opacity .3s,top .3s;pointer-events:none;}
+    .toast.show{opacity:1;top:90px;}
 
-    /* Question Card */
-    .question-card {
-      width: 100%;
-      max-width: 700px;
-      background-color: #15181d;
-      border-radius: 16px;
-      padding: 28px 32px;
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
-      display: none;
+    @media (max-width:600px){
+      .q-text{font-size:19px;}
+      .q-img img{width:260px;height:200px;}
+      .lessons{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
     }
-    .question-card.visible { display: block; }
-    .question-label {
-      font-size: 13px; font-weight: 600; color: #00bcd4;
-      margin-bottom: 10px; letter-spacing: 1px;
-    }
-    .question-text {
-      font-size: 20px; font-weight: 600;
-      line-height: 1.7; color: #ffffff;
-      white-space: pre-line;
-    }
-
-    /* Options */
-    .options-grid {
-      width: 100%; max-width: 700px;
-      display: none;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .options-grid.visible { display: grid; }
-    .option-btn {
-      background-color: #15181d; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px; padding: 16px 20px;
-      color: #fff; font-family: 'Cairo', sans-serif;
-      font-size: 16px; font-weight: 500; cursor: pointer;
-      text-align: right; transition: all 0.2s;
-    }
-    .option-btn:hover { border-color: #00bcd4; background-color: #1c2026; transform: translateY(-1px); }
-    .option-btn.selected { border-color: #00bcd4; background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(13,71,161,0.15)); }
-    .option-btn.correct { border-color: #10b981; background: rgba(16,185,129,0.15); }
-    .option-btn.wrong { border-color: #ef4444; background: rgba(239,68,68,0.15); }
-    .option-btn:disabled { cursor: default; opacity: 0.85; }
-    /* عند التعطيل: نلغي تأثير الـ hover ونُبقي اللون حسب حالة الزر */
-    .option-btn:disabled:hover { border-color: rgba(255,255,255,0.08); background-color: #15181d; }
-    .option-btn.selected:disabled:hover { border-color: #00bcd4; background: linear-gradient(135deg, rgba(0,188,212,0.15), rgba(13,71,161,0.15)); }
-    .option-btn.correct:disabled:hover { border-color: #10b981; background: rgba(16,185,129,0.15); }
-    .option-btn.wrong:disabled:hover { border-color: #ef4444; background: rgba(239,68,68,0.15); }
-
-    /* Explanation */
-    .explanation-area {
-      width: 100%; max-width: 700px;
-      display: none;
-    }
-    .explanation-area.visible { display: block; }
-    .explanation-box {
-      background-color: rgba(13,15,18,0.6);
-      border-radius: 16px; padding: 24px 28px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .shape-svg {
-      margin-top: 14px;
-      display: none;
-      justify-content: center;
-      background: #0a0b0d;
-      border-radius: 12px;
-      padding: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .shape-svg.visible { display: flex; }
-    .shape-svg svg {
-      max-width: 100%;
-      height: auto;
-    }
-    /* كل صور الأشكال بحجم موحّد (دون تشويه) */
-    .shape-svg img {
-      width: 320px;
-      height: 240px;
-      max-width: 100%;
-      object-fit: contain;
-      background: #fff;
-      border-radius: 8px;
-    }
-    .explanation-title { font-size: 14px; font-weight: 700; color: #00bcd4; margin-bottom: 8px; }
-    .explanation-result { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
-    .explanation-result.correct-text { color: #10b981; }
-    .explanation-result.wrong-text { color: #ef4444; }
-    .explanation-ai {
-      font-size: 15px; line-height: 1.8; color: #c9ced6;
-      padding: 12px; background: #15181d; border-radius: 10px;
-      border-right: 3px solid #00bcd4;
-    }
-    .explanation-ai .placeholder { color: #6a6f78; font-style: italic; }
-
-    /* Navigation */
-    .nav-controls {
-      width: 100%; max-width: 700px;
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .nav-controls.visible { display: flex; }
-    .nav-btn {
-      background: #15181d; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; padding: 10px 24px;
-      color: #f7f8f8; font-family: 'Cairo', sans-serif;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: all 0.2s;
-    }
-    .nav-btn:hover { border-color: #00bcd4; color: #00bcd4; }
-    .nav-btn:disabled { opacity: 0.3; cursor: default; }
-    .nav-btn:disabled:hover { border-color: rgba(255,255,255,0.08); color: #f7f8f8; }
-    .question-counter { font-size: 14px; color: #8a8f98; }
-
-    /* Sidebar */
-    .sidebar-content { width: 100%; display: none; flex-direction: column; gap: 8px; }
-    .panel-right.sidebar-mode .sidebar-content { display: flex; }
-    .panel-right.sidebar-mode .assistant-content { display: none; }
-    .back-btn {
-      background: none; border: none; color: #8a8f98;
-      font-family: 'Cairo', sans-serif; font-size: 14px;
-      cursor: pointer; padding: 6px 0; margin-bottom: 12px;
-      text-align: right; transition: color 0.2s;
-    }
-    .back-btn:hover { color: #00bcd4; }
-    .back-arrow { margin-left: 6px; }
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px;
-      cursor: pointer; transition: background 0.2s; user-select: none;
-    }
-    .section-header:hover { background-color: rgba(255,255,255,0.06); }
-    .section-header .label { font-size: 16px; font-weight: 700; }
-    .section-header .toggle-icon { font-size: 20px; color: #8a8f98; transition: transform 0.3s; font-weight: 300; }
-    .section-header.open .toggle-icon { transform: rotate(45deg); }
-    .sub-items { display: none; flex-direction: column; gap: 6px; padding-right: 16px; margin-top: 4px; }
-    .sub-items.open { display: flex; }
-    .sub-item {
-      background-color: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 14px; cursor: pointer; transition: background 0.2s;
-    }
-    .sub-item:hover { background-color: rgba(255,255,255,0.10); }
-    .sub-item.active { border-right: 3px solid #00bcd4; background-color: rgba(255,255,255,0.10); }
-    .sub-item .name { color: #f7f8f8; font-weight: 500; }
-    .sub-item .count { color: #8a8f98; font-size: 13px; background-color: #0d0f13; padding: 2px 10px; border-radius: 20px; }
-
-    .section-status { font-size: 13px; color: #6a6f78; text-align: center; padding: 20px; }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-
-    /* ===== Responsive: تخطيط عمود واحد على الجوال ===== */
-    @media (max-width: 768px) {
-      body { overflow: auto; height: auto; min-height: 100vh; }
-      .main { flex-direction: column; height: auto; }
-      .panel-right {
-        width: 100%; max-width: none; min-width: 0;
-        border-left: none; border-bottom: 1px solid rgba(255,255,255,0.08);
-        padding: 20px;
-      }
-      .panel-left { padding: 24px 16px; }
-      .options-grid.visible { grid-template-columns: 1fr; }
-      .avatar { width: 90px; height: 90px; font-size: 36px; margin-bottom: 20px; }
-      .question-text { font-size: 18px; }
-      .shape-svg img { width: 260px; height: 200px; }
-    }
-
-    /* ===== شاشة الدخول ===== */
-    .auth-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: radial-gradient(circle at 50% 30%, #1b2a3a 0%, #15181d 70%);
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px; overflow-y: auto;
-    }
-    .auth-overlay.hidden { display: none; }
-    .auth-card {
-      width: 100%; max-width: 420px; text-align: center;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .auth-logo {
-      width: 140px; height: 140px; border-radius: 50%;
-      background: #15181d;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 60px; margin-bottom: 24px;
-      box-shadow: 0 0 45px rgba(0,188,212,0.30);
-      animation: logoFloat 3s ease-in-out infinite;
-      overflow: hidden; flex-shrink: 0;
-    }
-    .auth-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    @keyframes logoFloat {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-16px); }
-    }
-    .auth-title { font-size: 30px; font-weight: 800; margin-bottom: 14px; }
-    .auth-desc { font-size: 16px; color: #8a8f98; line-height: 1.9; margin-bottom: 32px; max-width: 360px; }
-    .auth-btn {
-      width: 100%; max-width: 320px; padding: 15px; border: none; border-radius: 50px;
-      background: linear-gradient(135deg, #00bcd4, #0d47a1); color: #fff;
-      font-family: 'Cairo', sans-serif; font-size: 17px; font-weight: 700;
-      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
-      box-shadow: 0 8px 24px rgba(0,188,212,0.22);
-    }
-    .auth-btn:hover { opacity: 0.92; }
-    .auth-btn:active { transform: scale(0.98); }
-    .auth-form { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 14px; }
-    .auth-input {
-      width: 100%; padding: 14px 20px; border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.14); background: #15181d; color: #fff;
-      font-family: 'Cairo', sans-serif; font-size: 15px; outline: none; text-align: right;
-    }
-    .auth-input:focus { border-color: #00bcd4; }
-    .auth-input::placeholder { color: #6a6f78; }
-    .auth-error { color: #ef4444; font-size: 14px; min-height: 18px; }
-    .auth-back { background: none; border: none; color: #8a8f98; font-family: 'Cairo', sans-serif; font-size: 14px; cursor: pointer; margin-top: 6px; }
-    .auth-back:hover { color: #00bcd4; }
-    .logout-btn {
-      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-      background: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
-      color: #8a8f98; font-family: 'Cairo', sans-serif; font-size: 13px;
-      padding: 6px 14px; cursor: pointer; transition: all 0.2s;
-    }
-    .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
   </style>
 </head>
 <body>
 
-  <!-- ===== شاشة الدخول ===== -->
+  <!-- ===== Auth ===== -->
   <div class="auth-overlay" id="authOverlay">
-    <!-- اللوحة الترحيبية -->
     <div class="auth-card" id="landingPanel">
-<div class="auth-logo" id="appLogo"><img src="logo.png" alt="مساعد القدرات"></div>
+      <div class="auth-logo" id="logoBox"></div>
       <div class="auth-title">مساعد القدرات</div>
-      <div class="auth-desc">
-        منصّتك الذكية للتدرّب على اختبار القدرات العامة — أسئلة كمية ولفظية مع تصحيح فوري،
-        وشرح بالذكاء الاصطناعي، ومساعد صوتي يجيبك في أي وقت.
-      </div>
-      <button class="auth-btn" id="goLoginBtn" type="button">تسجيل الدخول</button>
+      <div class="auth-desc">تدرّب على اختبار القدرات بأسلوب ممتع — أسئلة كمية ولفظية، تصحيح فوري،
+        شرح بالذكاء الاصطناعي، ومساعد صوتي يجيبك في أي وقت.</div>
+      <button class="btn wfull" id="goLoginBtn">تسجيل الدخول</button>
     </div>
-
-    <!-- لوحة تسجيل الدخول -->
-    <div class="auth-card" id="loginPanel" style="display:none;">
-<div class="auth-logo" id="appLogo"><img src="logo.png" alt="مساعد القدرات"></div>
+    <div class="auth-card hidden" id="loginPanel">
+      <div class="auth-logo" id="logoBox2"></div>
       <div class="auth-title">تسجيل الدخول</div>
-      <div class="auth-desc">أدخل اسم المستخدم وكلمة المرور للدخول. إن كان اسم المستخدم جديداً سيُسجَّل تلقائياً.</div>
+      <div class="auth-desc">أدخل اسم المستخدم وكلمة المرور. إن كان جديداً سيُسجَّل تلقائياً.</div>
       <form class="auth-form" id="loginForm">
-        <input class="auth-input" id="authUser" type="text" placeholder="اسم المستخدم" autocomplete="username" required>
-        <input class="auth-input" id="authPass" type="password" placeholder="كلمة المرور" autocomplete="current-password" required>
+        <input class="auth-input" id="authUser" type="text" placeholder="اسم المستخدم" required>
+        <input class="auth-input" id="authPass" type="password" placeholder="كلمة المرور" required>
         <div class="auth-error" id="authError"></div>
-        <button class="auth-btn" type="submit">دخول</button>
+        <button class="btn" type="submit">دخول</button>
         <button class="auth-back" id="authBackBtn" type="button">→ رجوع</button>
       </form>
     </div>
   </div>
 
-  <nav class="navbar">
-    <span class="navbar-title" id="sectionsBtn">الاقسام</span>
-    <button class="logout-btn" id="logoutBtn" type="button">خروج</button>
-  </nav>
-
-  <div class="main">
-    <!-- Right Panel -->
-    <div class="panel-right" id="panelRight">
-      <div class="assistant-content" id="assistantContent">
-        <div class="avatar" id="assistantAvatar">🧠</div>
-        <div class="assistant-status" id="assistantStatus">اسألني أي سؤال عن القدرات</div>
-        <div class="chat-log" id="chatLog"></div>
-        <button class="conv-btn" id="convBtn" type="button">🎤 بدء المحادثة الصوتية</button>
-        <div class="input-wrapper">
-          <input class="input-field" id="askInput" type="text" placeholder="أو اكتب سؤالك هنا..." aria-label="اكتب سؤالك">
-          <button class="mic-btn" id="sendBtn" type="button" aria-label="إرسال">➤</button>
-        </div>
+  <!-- ===== App shell ===== -->
+  <div id="appShell" class="hidden">
+    <div class="topbar">
+      <div class="brand-row">
+        <div class="brand-mark" id="logoBox3"></div>
+        <span class="brand-name">مساعد القدرات</span>
       </div>
-      <div class="sidebar-content" id="sidebarContent">
-        <button class="back-btn" id="backBtn"><span class="back-arrow">←</span> رجوع</button>
-        <div class="section" data-section="quant">
-          <div class="section-header" data-target="quantSub">
-            <span class="label">كمي</span>
-            <span class="toggle-icon">+</span>
-          </div>
-          <div class="sub-items" id="quantSub">
-            <div class="sub-item" data-section="basic-operations" data-count="44">
-              <span class="name">الحساب</span>
-              <span class="count">44 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="algebra" data-count="35">
-              <span class="name">الجبر</span>
-              <span class="count">35 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="geometry" data-count="46">
-              <span class="name">الهندسة</span>
-              <span class="count">46 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="statistics" data-count="24">
-              <span class="name">الإحصاء</span>
-              <span class="count">24 سؤال</span>
-            </div>
-          </div>
-        </div>
-        <div class="section" data-section="verb">
-          <div class="section-header" data-target="verbSub">
-            <span class="label">لفظي</span>
-            <span class="toggle-icon">+</span>
-          </div>
-          <div class="sub-items" id="verbSub">
-            <div class="sub-item" data-section="sentence-completion" data-count="38">
-              <span class="name">إكمال الجملة</span>
-              <span class="count">38 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="verbal-analogy" data-count="45">
-              <span class="name">التناظر اللفظي</span>
-              <span class="count">45 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="contextual-error" data-count="19">
-              <span class="name">الخطأ السياقي</span>
-              <span class="count">19 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="odd-word" data-count="22">
-              <span class="name">المفردات الشاذة</span>
-              <span class="count">22 سؤال</span>
-            </div>
-            <div class="sub-item" data-section="mental-link" data-count="28">
-              <span class="name">الربط الذهني</span>
-              <span class="count">28 سؤال</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <button class="logout-btn" id="logoutBtn">خروج</button>
     </div>
 
-    <!-- Left Panel -->
-    <div class="panel-left" id="panelLeft">
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">📚</div>
-        <div class="welcome-title">أهلاً بك في مساعد القدرات</div>
-        <div class="welcome-text">
-          اختر القسم الذي تريد التدرب عليه من قائمة "الأقسام" في الأعلى<br>
-          لتظهر لك الأسئلة وحاول الإجابة بنفسك أولاً
+    <!-- Home -->
+    <div class="home" id="homeScreen">
+      <div class="home-hero">
+        <div style="font-size:40px">🎯</div>
+        <div>
+          <div class="big">اختر قسماً وابدأ التدرّب</div>
+          <div class="sm">١٠ أقسام · أسئلة كمية ولفظية مع شرح ذكي</div>
         </div>
       </div>
+      <div id="unitsContainer"></div>
+    </div>
 
-      <div class="question-card" id="questionCard">
-        <div class="question-label" id="questionLabel">السؤال</div>
-        <div class="question-text" id="questionText"></div>
-        <div class="shape-svg" id="shapeSvg"></div>
+    <!-- Quiz -->
+    <div class="quiz hidden" id="quizScreen">
+      <div class="quiz-top">
+        <button class="close-x" id="closeQuiz">✕</button>
+        <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="q-counter" id="qCounter">1/1</span>
       </div>
+      <div class="q-label" id="qLabel">السؤال</div>
+      <div class="q-text" id="qText"></div>
+      <div class="q-img" id="qImg"></div>
+      <div class="opts" id="opts"></div>
+    </div>
+  </div>
 
-      <div class="options-grid" id="optionsGrid"></div>
+  <!-- Check bar -->
+  <div class="checkbar hidden" id="checkbar">
+    <div class="checkbar-in">
+      <div class="feedback" id="feedback" style="display:none">
+        <div class="feedback-title" id="fbTitle"></div>
+        <div class="feedback-ai" id="explanationAi"></div>
+      </div>
+      <button class="btn btn-green" id="actionBtn" disabled>تحقّق</button>
+    </div>
+  </div>
 
-      <div class="explanation-area" id="explanationArea">
-        <div class="explanation-box">
-          <div class="explanation-title">نتيجتك</div>
-          <div class="explanation-result" id="explanationResult"></div>
-          <div class="explanation-ai" id="explanationAi">
-            <span class="placeholder">⟵ سيتم إضافة الشرح التفصيلي بالذكاء الاصطناعي قريباً ⟶</span>
-          </div>
+  <!-- Assistant -->
+  <button class="fab hidden" id="fab" title="اسأل المساعد"></button>
+  <div class="assistant-modal" id="assistantModal">
+    <div class="assistant-sheet">
+      <div class="as-head">
+        <div class="as-avatar" id="assistantAvatar"></div>
+        <div>
+          <div class="as-title">المساعد الصوتي</div>
+          <div class="as-status" id="assistantStatus">اسألني أي سؤال عن القدرات</div>
         </div>
+        <button class="as-close" id="asClose">✕</button>
       </div>
-
-      <div class="nav-controls" id="navControls">
-        <button class="nav-btn" id="prevBtn">→ السابق</button>
-        <span class="question-counter" id="questionCounter">1 / 1</span>
-        <button class="nav-btn" id="nextBtn">التالي ←</button>
+      <div class="chat-log" id="chatLog"></div>
+      <button class="btn" id="convBtn" style="margin-bottom:10px">🎤 بدء المحادثة الصوتية</button>
+      <div class="as-input-row">
+        <input class="as-input" id="askInput" type="text" placeholder="أو اكتب سؤالك هنا...">
+        <button class="icon-btn btn" id="sendBtn">➤</button>
       </div>
     </div>
   </div>
 
-  <!-- وكيل ElevenLabs مدمج داخل النافذة عبر الـ SDK الرسمي -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Brain+wave logo (shared) -->
+  <template id="logoSvg">
+    <svg viewBox="0 0 200 200" width="84%" height="84%" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="qg" x1="0.35" y1="0" x2="0.55" y2="1">
+        <stop offset="0" stop-color="#3df0ff"/><stop offset="0.5" stop-color="#1fc6e6"/><stop offset="1" stop-color="#1565ff"/>
+      </linearGradient></defs>
+      <g stroke="url(#qg)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <path d="M90 170 C58 168 42 142 48 110 C40 82 50 56 80 44 C108 33 142 38 160 60 C170 72 171 86 167 98 C164 107 174 112 174 122 C174 132 162 133 160 140 C158 148 165 152 160 160"/>
+        <path d="M160 160 C153 168 140 171 126 171"/><path d="M104 170 C103 178 102 184 102 190"/><path d="M120 170 C123 178 129 182 136 184"/>
+        <path d="M70 84 C86 75 100 79 105 92"/><path d="M66 108 C82 100 96 104 101 116"/>
+        <polyline points="58,108 78,108 88,108 96,90 104,124 112,76 120,124 128,90 136,108 150,108 162,108"/>
+      </g>
+    </svg>
+  </template>
+
+  <!-- ElevenLabs assistant -->
   <script type="module">
     import { Conversation } from 'https://cdn.jsdelivr.net/npm/@elevenlabs/client/+esm';
-
-    const convBtn    = document.getElementById('convBtn');
-    const sendBtn    = document.getElementById('sendBtn');
-    const askInput   = document.getElementById('askInput');
-    const chatLog    = document.getElementById('chatLog');
-    const statusEl   = document.getElementById('assistantStatus');
-    const avatarEl   = document.getElementById('assistantAvatar');
-
-    let conversation = null;
-
-    function addMsg(text, who) {
-      if (!text) return;
-      const div = document.createElement('div');
-      div.className = 'chat-msg ' + (who === 'user' ? 'user' : 'ai');
-      div.textContent = text;
-      chatLog.appendChild(div);
-      chatLog.scrollTop = chatLog.scrollHeight;
+    const convBtn=document.getElementById('convBtn'),sendBtn=document.getElementById('sendBtn'),
+      askInput=document.getElementById('askInput'),chatLog=document.getElementById('chatLog'),
+      statusEl=document.getElementById('assistantStatus'),avatarEl=document.getElementById('assistantAvatar');
+    let conversation=null;
+    function addMsg(t,who){if(!t)return;const d=document.createElement('div');d.className='chat-msg '+(who==='user'?'user':'ai');d.textContent=t;chatLog.appendChild(d);chatLog.scrollTop=chatLog.scrollHeight;}
+    function lookupQuestion(section,number){
+      const map={'إكمال الجملة':'sentenceCompletionQuestions','اكمال الجملة':'sentenceCompletionQuestions','التناظر اللفظي':'verbalAnalogyQuestions','الخطأ السياقي':'contextualErrorQuestions','المفردات الشاذة':'oddWordQuestions','الربط الذهني':'mentalLinkQuestions','الهندسة':'geometryQuestions','الجبر':'algebraQuestions','الإحصاء':'statisticsQuestions','العمليات الرياضية الأساسية':'basicOperationsQuestions','العمليات الحسابية':'basicOperationsQuestions'};
+      const v=map[String(section||'').trim()];const arr=(v&&Array.isArray(window[v]))?window[v]:null;
+      if(!arr)return 'لم أتعرّف على القسم.';
+      const q=arr.find(x=>String(x.id)===String(number).trim());
+      if(!q)return 'لا يوجد سؤال رقم '+number+' في هذا القسم.';
+      const opts=(q.options||[]).map(o=>o.l+') '+o.t).join('، ');
+      const correct=(q.answer>=0&&q.options[q.answer])?q.options[q.answer].t:'غير محددة';
+      return 'السؤال رقم '+q.id+': '+q.stem+'\nالخيارات: '+opts+'\nالإجابة الصحيحة: '+correct;
     }
-
-    // يطلب رابطاً موقّعاً من خادمنا (المفتاح يبقى مخفياً على الخادم)
-    async function getSignedUrl() {
-      const r = await fetch('/api/signed-url');
-      if (!r.ok) {
-        let e = ''; try { e = (await r.json()).error || ''; } catch (_) {}
-        throw new Error(e || ('HTTP ' + r.status));
-      }
-      return (await r.json()).signedUrl;
-    }
-
-    // ===== أداة جلب سؤال بالرقم والقسم من بيانات الموقع (questions.js) =====
-    function lookupQuestion(section, number) {
-      const s = String(section || '').trim();
-      const map = {
-        'إكمال الجملة': 'sentenceCompletionQuestions', 'اكمال الجملة': 'sentenceCompletionQuestions', 'إكمال': 'sentenceCompletionQuestions', 'sentence-completion': 'sentenceCompletionQuestions',
-        'التناظر اللفظي': 'verbalAnalogyQuestions', 'تناظر': 'verbalAnalogyQuestions', 'verbal-analogy': 'verbalAnalogyQuestions',
-        'الخطأ السياقي': 'contextualErrorQuestions', 'خطأ سياقي': 'contextualErrorQuestions', 'contextual-error': 'contextualErrorQuestions',
-        'المفردات الشاذة': 'oddWordQuestions', 'المفردة الشاذة': 'oddWordQuestions', 'الشاذة': 'oddWordQuestions', 'odd-word': 'oddWordQuestions',
-        'الربط الذهني': 'mentalLinkQuestions', 'ربط ذهني': 'mentalLinkQuestions', 'mental-link': 'mentalLinkQuestions',
-        'الهندسة': 'geometryQuestions', 'هندسة': 'geometryQuestions', 'geometry': 'geometryQuestions',
-        'الجبر': 'algebraQuestions', 'جبر': 'algebraQuestions', 'algebra': 'algebraQuestions',
-        'الإحصاء': 'statisticsQuestions', 'احصاء': 'statisticsQuestions', 'statistics': 'statisticsQuestions',
-        'الحساب': 'basicOperationsQuestions', 'العمليات الحسابية': 'basicOperationsQuestions', 'العمليات': 'basicOperationsQuestions', 'basic-operations': 'basicOperationsQuestions'
-      };
-      const varName = map[s];
-      const arr = (varName && Array.isArray(window[varName])) ? window[varName] : null;
-      if (!arr) return 'لم أتعرّف على القسم. الأقسام المتاحة: إكمال الجملة، التناظر اللفظي، الخطأ السياقي، المفردات الشاذة، الربط الذهني.';
-
-      const q = arr.find(x => String(x.id) === String(number).trim());
-      if (!q) return `لا يوجد سؤال رقم ${number} في قسم ${s}.`;
-
-      const opts = (q.options || []).map(o => `${o.l}) ${o.t}`).join('، ');
-      const correct = (q.answer >= 0 && q.options[q.answer]) ? q.options[q.answer].t : 'غير محدّدة';
-      return `السؤال رقم ${q.id} (${s}): ${q.stem}\nالخيارات: ${opts}\nالإجابة الصحيحة: ${correct}`;
-    }
-
-    async function startConversation() {
-      if (conversation) return true;
-      try {
-        statusEl.textContent = 'جارٍ الاتصال...';
-        const signedUrl = await getSignedUrl();
-        conversation = await Conversation.startSession({
-          signedUrl,
-          // الأدوات التي يستطيع الوكيل استدعاؤها (يجب تعريف أداة بنفس الاسم في لوحة ElevenLabs)
-          clientTools: {
-            get_question: async ({ section, number }) => {
-              const result = lookupQuestion(section, number);
-              console.log('🔧 get_question called:', { section, number }, '=>', result);
-              return result;
-            }
-          },
-          onConnect:    () => { statusEl.textContent = '🟢 متصل — تحدّث أو اكتب'; convBtn.textContent = '⏹ إنهاء المحادثة'; convBtn.classList.add('active'); },
-          onDisconnect: (details) => {
-            console.warn('ElevenLabs disconnected. السبب:', details);
-            const reason = details && (details.reason || (details.message) || (details.context && details.context.reason));
-            statusEl.textContent = reason ? ('انقطع الاتصال: ' + reason) : 'انتهت المحادثة';
-            convBtn.textContent = '🎤 بدء المحادثة الصوتية'; convBtn.classList.remove('active'); avatarEl.classList.remove('speaking'); conversation = null;
-          },
-          onError:      (msg, context) => { console.error('ElevenLabs error:', msg, context); statusEl.textContent = '⚠️ خطأ: ' + (msg || ''); },
-          onModeChange: ({ mode }) => {
-            if (mode === 'speaking') { statusEl.textContent = '🔊 المساعد يتحدّث...'; avatarEl.classList.add('speaking'); }
-            else                     { statusEl.textContent = '🎧 يستمع إليك...';     avatarEl.classList.remove('speaking'); }
-          },
-          onMessage: ({ message, source }) => addMsg(message, source === 'user' ? 'user' : 'ai')
-        });
+    async function getSignedUrl(){const r=await fetch('/api/signed-url');if(!r.ok){let e='';try{e=(await r.json()).error||'';}catch(_){}throw new Error(e||('HTTP '+r.status));}return (await r.json()).signedUrl;}
+    async function startConversation(){
+      if(conversation)return true;
+      try{
+        statusEl.textContent='جارٍ الاتصال...';
+        const signedUrl=await getSignedUrl();
+        conversation=await Conversation.startSession({signedUrl,
+          clientTools:{get_question:async({section,number})=>lookupQuestion(section,number)},
+          onConnect:()=>{statusEl.textContent='🟢 متصل — تحدّث أو اكتب';convBtn.textContent='⏹ إنهاء المحادثة';},
+          onDisconnect:(d)=>{const r=d&&(d.reason||d.message);statusEl.textContent=r?('انقطع: '+r):'انتهت المحادثة';convBtn.textContent='🎤 بدء المحادثة الصوتية';avatarEl.classList.remove('speaking');conversation=null;},
+          onError:(m)=>{console.error('EL',m);statusEl.textContent='⚠️ خطأ: '+(m||'');},
+          onModeChange:({mode})=>{if(mode==='speaking'){statusEl.textContent='🔊 المساعد يتحدّث...';avatarEl.classList.add('speaking');}else{statusEl.textContent='🎧 يستمع إليك...';avatarEl.classList.remove('speaking');}},
+          onMessage:({message,source})=>addMsg(message,source==='user'?'user':'ai')});
         return true;
-      } catch (e) {
-        console.error('تعذّر بدء المحادثة:', e);
-        statusEl.textContent = '⚠️ تعذّر بدء المحادثة (' + e.message + ')';
-        conversation = null;
-        return false;
-      }
+      }catch(e){statusEl.textContent='⚠️ تعذّر بدء المحادثة ('+e.message+')';conversation=null;return false;}
     }
-
-    convBtn.addEventListener('click', async () => {
-      if (conversation) await conversation.endSession();
-      else await startConversation();
-    });
-
-    async function sendText() {
-      const text = askInput.value.trim();
-      if (!text) return;
-      if (!conversation && !(await startConversation())) return;
-      conversation.sendUserMessage(text);
-      askInput.value = '';
-    }
-    sendBtn.addEventListener('click', sendText);
-    askInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendText(); });
+    convBtn.addEventListener('click',async()=>{if(conversation)await conversation.endSession();else await startConversation();});
+    async function sendText(){const t=askInput.value.trim();if(!t)return;if(!conversation&&!(await startConversation()))return;conversation.sendUserMessage(t);askInput.value='';}
+    sendBtn.addEventListener('click',sendText);
+    askInput.addEventListener('keydown',e=>{if(e.key==='Enter')sendText();});
   </script>
 
   <script src="questions.js"></script>
   <script>
-    // ===== إعدادات =====
-    // عنوان الخادم الوسيط (Proxy) الذي يحتفظ بمفتاح Gemini بأمان على الخادم.
-    // لا توجد أي مفاتيح API في كود المتصفح بعد الآن.
-    const EXPLAIN_ENDPOINT = '/api/explain';
-
-    // قراءة آمنة لمتغيرات الأسئلة القادمة من questions.js (تفادي ReferenceError)
-    const safeQuestions = (name) =>
-      (typeof window[name] !== 'undefined' && Array.isArray(window[name])) ? window[name] : [];
-
-    // ===== State =====
-    const sections = {
-      // اللفظي
-      'sentence-completion': { name: 'إكمال الجملة',     questions: safeQuestions('sentenceCompletionQuestions') },
-      'verbal-analogy':      { name: 'التناظر اللفظي',   questions: safeQuestions('verbalAnalogyQuestions') },
-      'contextual-error':    { name: 'الخطأ السياقي',    questions: safeQuestions('contextualErrorQuestions') },
-      'odd-word':            { name: 'المفردات الشاذة',  questions: safeQuestions('oddWordQuestions') },
-      'mental-link':         { name: 'الربط الذهني',     questions: safeQuestions('mentalLinkQuestions') },
-      // الكمي (لم تُضف الأسئلة بعد)
-      'basic-operations':    { name: 'الحساب', questions: safeQuestions('basicOperationsQuestions') },
-      'algebra':             { name: 'الجبر',            questions: safeQuestions('algebraQuestions') },
-      'geometry':            { name: 'الهندسة',          questions: safeQuestions('geometryQuestions') },
-      'statistics':          { name: 'الإحصاء',          questions: safeQuestions('statisticsQuestions') }
+    // ===== data =====
+    const sq=n=>(typeof window[n]!=='undefined'&&Array.isArray(window[n]))?window[n]:[];
+    const sections={
+      'sentence-completion':{name:'إكمال الجملة',q:sq('sentenceCompletionQuestions')},
+      'verbal-analogy':{name:'التناظر اللفظي',q:sq('verbalAnalogyQuestions')},
+      'contextual-error':{name:'الخطأ السياقي',q:sq('contextualErrorQuestions')},
+      'odd-word':{name:'المفردات الشاذة',q:sq('oddWordQuestions')},
+      'mental-link':{name:'الربط الذهني',q:sq('mentalLinkQuestions')},
+      'basic-operations':{name:'العمليات الرياضية الأساسية',q:sq('basicOperationsQuestions')},
+      'arithmetic':{name:'الحساب',q:sq('arithmeticQuestions')},
+      'algebra':{name:'الجبر',q:sq('algebraQuestions')},
+      'geometry':{name:'الهندسة',q:sq('geometryQuestions')},
+      'statistics':{name:'الإحصاء',q:sq('statisticsQuestions')},
     };
+    const meta={
+      'sentence-completion':{icon:'✍️',c:'#1cb0f6'},'verbal-analogy':{icon:'🔗',c:'#ce82ff'},
+      'contextual-error':{icon:'🔍',c:'#ff9600'},'odd-word':{icon:'🧩',c:'#58cc02'},
+      'mental-link':{icon:'🧠',c:'#ff4b4b'},'basic-operations':{icon:'➗',c:'#1cb0f6'},
+      'arithmetic':{icon:'🔢',c:'#ce82ff'},'algebra':{icon:'📐',c:'#ff9600'},
+      'geometry':{icon:'📊',c:'#58cc02'},'statistics':{icon:'📈',c:'#00bcd4'},
+    };
+    const units=[
+      {title:'القسم اللفظي',color:'#ce82ff',keys:['sentence-completion','verbal-analogy','contextual-error','odd-word','mental-link']},
+      {title:'القسم الكمي',color:'#1cb0f6',keys:['basic-operations','arithmetic','algebra','geometry','statistics']},
+    ];
 
-    let currentSection = null;
-    let currentIndex = 0;
-    let answered = false;
-    let explainRequestId = 0; // لتجاهل ردود قديمة عند تغيير السؤال بسرعة
-
-    // ===== DOM refs =====
-    const panelRight = document.getElementById('panelRight');
-    const sectionsBtn = document.getElementById('sectionsBtn');
-    const backBtn = document.getElementById('backBtn');
-    const welcome = document.getElementById('welcome');
-    const questionCard = document.getElementById('questionCard');
-    const questionLabel = document.getElementById('questionLabel');
-    const questionText = document.getElementById('questionText');
-    const optionsGrid = document.getElementById('optionsGrid');
-    const explanationArea = document.getElementById('explanationArea');
-    const explanationResult = document.getElementById('explanationResult');
-    const explanationAi = document.getElementById('explanationAi');
-    const navControls = document.getElementById('navControls');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const questionCounter = document.getElementById('questionCounter');
-    const shapeSvg = document.getElementById('shapeSvg');
-
-    // ===== Accordion Toggle =====
-    document.querySelectorAll('.section-header').forEach(h => {
-      h.addEventListener('click', function() {
-        const target = document.getElementById(this.dataset.target);
-        if (!target) return;
-        target.classList.toggle('open');
-        this.classList.toggle('open');
-      });
+    // logo into boxes
+    const tpl=document.getElementById('logoSvg');
+    ['logoBox','logoBox2','logoBox3','assistantAvatar','fab'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.appendChild(tpl.content.cloneNode(true));
     });
 
-    // ===== Panel toggle =====
-    sectionsBtn.addEventListener('click', () => panelRight.classList.add('sidebar-mode'));
-    backBtn.addEventListener('click', () => panelRight.classList.remove('sidebar-mode'));
+    // ===== refs =====
+    const appShell=document.getElementById('appShell'),homeScreen=document.getElementById('homeScreen'),
+      quizScreen=document.getElementById('quizScreen'),unitsC=document.getElementById('unitsContainer'),
+      checkbar=document.getElementById('checkbar'),feedback=document.getElementById('feedback'),
+      fbTitle=document.getElementById('fbTitle'),explanationAi=document.getElementById('explanationAi'),
+      actionBtn=document.getElementById('actionBtn'),qText=document.getElementById('qText'),
+      qLabel=document.getElementById('qLabel'),qImg=document.getElementById('qImg'),optsEl=document.getElementById('opts'),
+      qCounter=document.getElementById('qCounter'),progressFill=document.getElementById('progressFill'),
+      toastEl=document.getElementById('toast'),fab=document.getElementById('fab');
 
-    // ===== Load Section =====
-    document.querySelectorAll('.sub-item[data-section]').forEach(item => {
-      item.addEventListener('click', function() {
-        panelRight.classList.remove('sidebar-mode');
-        document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
-        this.classList.add('active');
+    let curKey=null,curIndex=0,selected=null,answered=false,explainReq=0;
 
-        const sectionKey = this.dataset.section;
-        const section = sections[sectionKey];
-        if (!section || !section.questions || section.questions.length === 0) {
-          const sectionName = section ? section.name : 'هذا القسم';
-          welcome.innerHTML =
-            '<div class="welcome-icon">🛠️</div>' +
-            '<div class="welcome-title">نعتذر منك</div>' +
-            '<div class="welcome-text">أسئلة قسم «' + sectionName + '» لم تُضَف بعد،<br>وسيتم إضافتها قريباً بإذن الله 🌟</div>';
-          welcome.style.display = 'block';
-          questionCard.classList.remove('visible');
-          optionsGrid.classList.remove('visible');
-          explanationArea.classList.remove('visible');
-          navControls.classList.remove('visible');
-          return;
-        }
-
-        currentSection = sectionKey;
-        currentIndex = 0;
-        showQuestion(currentIndex);
-      });
-    });
-
-    // ===== Show Question =====
-    function showQuestion(index) {
-      const section = sections[currentSection];
-      if (!section) return;
-
-      const q = section.questions[index];
-      if (!q) return;
-
-      welcome.style.display = 'none';
-      questionCard.classList.add('visible');
-      optionsGrid.classList.add('visible');
-      navControls.classList.add('visible');
-      explanationArea.classList.remove('visible');
-
-      answered = false;
-
-      questionLabel.textContent = `السؤال ${q.id}`;
-      questionText.textContent = q.stem;
-
-      // Shape SVG (محتوى موثوق من ملف الأسئلة الخاص بك)
-      if (q.shapeSVG) {
-        shapeSvg.innerHTML = q.shapeSVG;
-        shapeSvg.classList.add('visible');
-      } else {
-        shapeSvg.innerHTML = '';
-        shapeSvg.classList.remove('visible');
-      }
-
-      // Build options
-      optionsGrid.innerHTML = '';
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.type = 'button';
-        btn.textContent = `${opt.l}) ${opt.t}`;
-        btn.dataset.index = i;
-        btn.addEventListener('click', () => selectOption(i));
-        optionsGrid.appendChild(btn);
-      });
-
-      // Navigation
-      questionCounter.textContent = `${index + 1} / ${section.questions.length}`;
-      prevBtn.disabled = index === 0;
-      nextBtn.disabled = index === section.questions.length - 1;
-    }
-
-    // ===== Select Option =====
-    function selectOption(index) {
-      if (answered) return;
-      answered = true;
-
-      const section = sections[currentSection];
-      const q = section.questions[currentIndex];
-      const buttons = optionsGrid.querySelectorAll('.option-btn');
-
-      if (q.answer === -1) {
-        buttons.forEach((btn, i) => {
-          btn.disabled = true;
-          if (i === index) btn.classList.add('selected');
+    // ===== home =====
+    function renderHome(){
+      unitsC.innerHTML='';
+      units.forEach(u=>{
+        const div=document.createElement('div');div.className='unit';
+        div.innerHTML='<div class="unit-head"><span class="unit-title" style="color:'+u.color+'">'+u.title+'</span><span class="unit-bar" style="background:'+u.color+'22"></span></div>';
+        const grid=document.createElement('div');grid.className='lessons';
+        u.keys.forEach(k=>{
+          const s=sections[k],m=meta[k],n=s.q.length;
+          const card=document.createElement('div');card.className='lesson'+(n===0?' locked':'');
+          card.innerHTML='<div class="lesson-ic" style="background:'+m.c+'">'+m.icon+'</div>'+
+            '<div class="lesson-name">'+s.name+'</div>'+
+            '<div class="lesson-count">'+(n>0?(n+' سؤال'):'قريباً')+'</div>';
+          if(n>0)card.addEventListener('click',()=>openSection(k));
+          grid.appendChild(card);
         });
-        explanationResult.textContent = '✅ تم اختيار الإجابة';
-        explanationResult.className = 'explanation-result correct-text';
-      } else {
-        buttons.forEach((btn, i) => {
-          btn.disabled = true;
-          if (i === q.answer) btn.classList.add('correct');
-          if (i === index && i !== q.answer) btn.classList.add('wrong');
-          if (i === index) btn.classList.add('selected');
-        });
-
-        const isCorrect = index === q.answer;
-        explanationResult.textContent = isCorrect ? '✅ إجابة صحيحة!' : '❌ إجابة خاطئة';
-        explanationResult.className = 'explanation-result ' + (isCorrect ? 'correct-text' : 'wrong-text');
-      }
-
-      explanationAi.innerHTML = `<span class="placeholder">⟵ جاري توليد الشرح ... ⟶</span>`;
-      explanationArea.classList.add('visible');
-
-      if (q.answer !== -1) {
-        const correctText = q.options[q.answer].t;
-        getExplanation(q.stem, correctText);
-      }
-    }
-
-    // ===== تهريب HTML لمنع الحقن من ردّ النموذج =====
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
-
-    // تنسيق مبسّط (Markdown بسيط) بعد التهريب — آمن لأن الوسوم الوحيدة من عندنا
-    function formatExplanation(text) {
-      return escapeHtml(text)
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\n/g, '<br>');
-    }
-
-    // ===== جلب الشرح عبر الخادم الوسيط (بدون أي مفتاح في المتصفح) =====
-    async function getExplanation(question, correctOption) {
-      const reqId = ++explainRequestId;
-      try {
-        const response = await fetch(EXPLAIN_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question, answer: correctOption })
-        });
-
-        if (reqId !== explainRequestId) return; // تجاهل ردّاً قديماً
-
-        if (!response.ok) {
-          let serverMsg = '';
-          try { const e = await response.json(); serverMsg = e && e.error ? e.error : ''; } catch (_) {}
-          let msg = 'عذراً، تعذّر تحميل الشرح.';
-          if (response.status === 429) msg = '⚠️ تم تجاوز حد الاستخدام، حاول بعد قليل.';
-          else if (response.status === 401 || response.status === 403) msg = '⚠️ مشكلة في إعداد المفتاح على الخادم.';
-          else if (response.status === 503) msg = '⚠️ الخدمة مشغولة حالياً، أعد المحاولة.';
-          const detail = serverMsg ? ` (${escapeHtml(serverMsg)})` : ` [HTTP ${response.status}]`;
-          explanationAi.innerHTML = `<span class="placeholder">${msg}${detail}</span>`;
-          return;
-        }
-
-        const data = await response.json();
-        if (reqId !== explainRequestId) return;
-
-        const explanation = (data && data.text) ? data.text : 'عذراً، لم يتم استلام شرح.';
-        explanationAi.innerHTML = formatExplanation(explanation);
-      } catch (error) {
-        if (reqId !== explainRequestId) return;
-        console.error('خطأ في جلب الشرح:', error);
-        explanationAi.innerHTML = `<span class="placeholder">🤖 تعذّر الاتصال بالخادم، انتظر قليلاً وأعد المحاولة.</span>`;
-      }
-    }
-
-    // ===== Navigation =====
-    prevBtn.addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-        showQuestion(currentIndex);
-      }
-    });
-
-    nextBtn.addEventListener('click', () => {
-      const section = sections[currentSection];
-      if (section && currentIndex < section.questions.length - 1) {
-        currentIndex++;
-        showQuestion(currentIndex);
-      }
-    });
-  </script>
-
-  <!-- ===== منطق شاشة الدخول (تخزين محلي بسيط) ===== -->
-  <script>
-    (function () {
-      const overlay = document.getElementById('authOverlay');
-      const landing = document.getElementById('landingPanel');
-      const loginP = document.getElementById('loginPanel');
-      const goLogin = document.getElementById('goLoginBtn');
-      const back = document.getElementById('authBackBtn');
-      const form = document.getElementById('loginForm');
-      const userI = document.getElementById('authUser');
-      const passI = document.getElementById('authPass');
-      const errEl = document.getElementById('authError');
-      const logout = document.getElementById('logoutBtn');
-
-      const USERS_KEY = 'qudraUsers';
-      const SESSION_KEY = 'qudraSession';
-      const getUsers = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; } };
-      const saveUsers = (u) => localStorage.setItem(USERS_KEY, JSON.stringify(u));
-
-      function enterApp() { overlay.classList.add('hidden'); if (logout) logout.style.display = 'block'; }
-      function showAuth() { overlay.classList.remove('hidden'); landing.style.display = 'flex'; loginP.style.display = 'none'; if (logout) logout.style.display = 'none'; }
-
-      // عند التحميل: ادخل مباشرة إن كان هناك جلسة محفوظة
-      if (localStorage.getItem(SESSION_KEY)) enterApp(); else showAuth();
-
-      goLogin && goLogin.addEventListener('click', () => { landing.style.display = 'none'; loginP.style.display = 'flex'; errEl.textContent = ''; userI.focus(); });
-      back && back.addEventListener('click', () => { loginP.style.display = 'none'; landing.style.display = 'flex'; });
-
-      form && form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const u = userI.value.trim();
-        const p = passI.value;
-        if (!u || !p) { errEl.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور.'; return; }
-        const users = getUsers();
-        if (users[u] === undefined) {            // مستخدم جديد → تسجيل
-          users[u] = p; saveUsers(users);
-        } else if (users[u] !== p) {             // موجود وكلمة مرور خاطئة
-          errEl.textContent = 'كلمة المرور غير صحيحة.'; return;
-        }
-        localStorage.setItem(SESSION_KEY, u);
-        errEl.textContent = ''; passI.value = '';
-        enterApp();
+        div.appendChild(grid);unitsC.appendChild(div);
       });
+    }
 
-      logout && logout.addEventListener('click', () => { localStorage.removeItem(SESSION_KEY); showAuth(); });
+    function openSection(k){curKey=k;curIndex=0;homeScreen.classList.add('hidden');quizScreen.classList.remove('hidden');checkbar.classList.remove('hidden');showQuestion(0);}
+    function backHome(){quizScreen.classList.add('hidden');checkbar.classList.add('hidden');homeScreen.classList.remove('hidden');}
+
+    function showQuestion(i){
+      const s=sections[curKey];const q=s.q[i];if(!q)return;
+      selected=null;answered=false;explainReq++;
+      qLabel.textContent='سؤال رقم '+q.id;
+      qText.textContent=q.stem;
+      if(q.shapeSVG){qImg.innerHTML=q.shapeSVG;qImg.classList.add('show');}else{qImg.innerHTML='';qImg.classList.remove('show');}
+      optsEl.innerHTML='';
+      q.options.forEach((o,idx)=>{
+        const b=document.createElement('button');b.className='opt';b.type='button';b.textContent=o.l+') '+o.t;
+        b.addEventListener('click',()=>selectOpt(idx,b));optsEl.appendChild(b);
+      });
+      qCounter.textContent=(i+1)+'/'+s.q.length;
+      progressFill.style.width=(i/s.q.length*100)+'%';
+      // reset checkbar
+      checkbar.className='checkbar';feedback.style.display='none';
+      actionBtn.textContent='تحقّق';actionBtn.className='btn btn-green';actionBtn.disabled=true;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function selectOpt(idx,btn){
+      if(answered)return;
+      selected=idx;
+      optsEl.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      actionBtn.disabled=false;
+    }
+
+    function check(){
+      const s=sections[curKey];const q=s.q[curIndex];
+      answered=true;
+      const btns=optsEl.querySelectorAll('.opt');
+      btns.forEach(b=>b.disabled=true);
+      let correct=true;
+      if(q.answer===-1){
+        btns[selected].classList.add('sel');
+        fbTitle.textContent='✅ تم اختيار الإجابة';fbTitle.className='feedback-title correct';
+        checkbar.className='checkbar correct';
+      }else{
+        correct=(selected===q.answer);
+        btns[q.answer].classList.add('correct');
+        if(!correct)btns[selected].classList.add('wrong');
+        fbTitle.textContent=correct?'🎉 إجابة صحيحة!':('❌ الإجابة الصحيحة: '+q.options[q.answer].t);
+        fbTitle.className='feedback-title '+(correct?'correct':'wrong');
+        checkbar.className='checkbar '+(correct?'correct':'wrong');
+      }
+      feedback.style.display='block';
+      explanationAi.innerHTML='<span class="ph">⟵ جاري توليد الشرح ...</span>';
+      progressFill.style.width=((curIndex+1)/s.q.length*100)+'%';
+      actionBtn.textContent='التالي';actionBtn.className='btn '+(correct?'btn-green':'btn-red');actionBtn.disabled=false;
+      if(q.answer!==-1)getExplanation(q.stem,q.options[q.answer].t);
+    }
+
+    function next(){
+      const s=sections[curKey];
+      if(curIndex<s.q.length-1){curIndex++;showQuestion(curIndex);}
+      else{showToast('🎉 أحسنت! أكملت قسم '+s.name);backHome();}
+    }
+
+    actionBtn.addEventListener('click',()=>{if(!answered)check();else next();});
+    document.getElementById('closeQuiz').addEventListener('click',backHome);
+
+    // ===== Gemini explanation =====
+    function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function fmt(t){return esc(t).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');}
+    async function getExplanation(question,answer){
+      const id=++explainReq;
+      try{
+        const r=await fetch('/api/explain',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,answer})});
+        if(id!==explainReq)return;
+        if(!r.ok){let m='عذراً، تعذّر تحميل الشرح.';if(r.status===429)m='⚠️ تجاوزت حد الاستخدام، حاول لاحقاً.';explanationAi.innerHTML='<span class="ph">'+m+'</span>';return;}
+        const d=await r.json();if(id!==explainReq)return;
+        explanationAi.innerHTML=fmt((d&&d.text)?d.text:'لم يتم استلام شرح.');
+      }catch(e){if(id!==explainReq)return;explanationAi.innerHTML='<span class="ph">🤖 تعذّر الاتصال بالخادم.</span>';}
+    }
+
+    function showToast(t){toastEl.textContent=t;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2600);}
+
+    // ===== assistant modal =====
+    const modal=document.getElementById('assistantModal');
+    fab.addEventListener('click',()=>modal.classList.add('show'));
+    document.getElementById('asClose').addEventListener('click',()=>modal.classList.remove('show'));
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show');});
+
+    // ===== auth =====
+    (function(){
+      const overlay=document.getElementById('authOverlay'),landing=document.getElementById('landingPanel'),
+        loginP=document.getElementById('loginPanel'),goLogin=document.getElementById('goLoginBtn'),
+        back=document.getElementById('authBackBtn'),form=document.getElementById('loginForm'),
+        userI=document.getElementById('authUser'),passI=document.getElementById('authPass'),
+        errEl=document.getElementById('authError'),logout=document.getElementById('logoutBtn');
+      const UK='qudraUsers',SK='qudraSession';
+      const getU=()=>{try{return JSON.parse(localStorage.getItem(UK)||'{}');}catch(_){return{};}};
+      function enter(){overlay.classList.add('hidden');appShell.classList.remove('hidden');fab.classList.remove('hidden');renderHome();}
+      function show(){overlay.classList.remove('hidden');landing.classList.remove('hidden');loginP.classList.add('hidden');appShell.classList.add('hidden');fab.classList.add('hidden');}
+      if(localStorage.getItem(SK))enter();else show();
+      goLogin.addEventListener('click',()=>{landing.classList.add('hidden');loginP.classList.remove('hidden');errEl.textContent='';userI.focus();});
+      back.addEventListener('click',()=>{loginP.classList.add('hidden');landing.classList.remove('hidden');});
+      form.addEventListener('submit',e=>{e.preventDefault();const u=userI.value.trim(),p=passI.value;
+        if(!u||!p){errEl.textContent='يرجى إدخال اسم المستخدم وكلمة المرور.';return;}
+        const users=getU();
+        if(users[u]===undefined){users[u]=p;localStorage.setItem(UK,JSON.stringify(users));}
+        else if(users[u]!==p){errEl.textContent='كلمة المرور غير صحيحة.';return;}
+        localStorage.setItem(SK,u);errEl.textContent='';passI.value='';enter();
+      });
+      logout.addEventListener('click',()=>{localStorage.removeItem(SK);backHome();show();});
     })();
   </script>
 </body>
