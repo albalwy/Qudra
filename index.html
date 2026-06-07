@@ -88,12 +88,16 @@
   .auth-error{color:var(--red);font-size:14px;min-height:18px;font-weight:700;}
   .auth-back{background:none;border:none;color:var(--muted);font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}.wfull2{width:100%;max-width:340px;}
   /* assistant — FAB shaped as the logo */
-  .fab{position:fixed;bottom:24px;left:24px;width:72px;height:72px;border-radius:50%;background:#0e1726;border:none;cursor:pointer;z-index:70;
+  .fab-wrap{position:fixed;bottom:24px;left:24px;z-index:70;display:flex;align-items:center;gap:10px;}
+  .fab{width:72px;height:72px;border-radius:50%;background:#0e1726;border:none;cursor:pointer;flex-shrink:0;
     box-shadow:0 0 0 4px rgba(0,188,212,.18),0 8px 24px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;
     transition:transform .12s,box-shadow .2s;animation:fabGlow 2.6s ease-in-out infinite;}
   .fab:hover{transform:scale(1.07);}
   @keyframes fabGlow{0%,100%{box-shadow:0 0 0 4px rgba(0,188,212,.16),0 8px 24px rgba(0,0,0,.5);}50%{box-shadow:0 0 0 7px rgba(0,188,212,.28),0 8px 28px rgba(0,0,0,.5);}}
   .fab svg{width:84%;height:84%;}
+  .fab-hint{font-size:12px;font-weight:700;color:rgba(255,255,255,.45);background:rgba(23,26,32,.45);
+    padding:5px 12px;border-radius:9999px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,.06);}
   .assistant-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:none;}
   .assistant-modal.show{display:block;}
   .assistant-sheet{position:fixed;left:0;top:0;height:100vh;width:min(400px,92vw);background:var(--surface);
@@ -167,7 +171,7 @@
     </div>
   </div>
 
-  <button class="fab hidden" id="fab"></button>
+  <div class="fab-wrap hidden" id="fabWrap"><span class="fab-hint">🎙️ المساعد الصوتي</span><button class="fab" id="fab"></button></div>
   <div class="assistant-modal" id="assistantModal"><div class="assistant-sheet">
     <div class="as-head"><div class="as-avatar" id="assistantAvatar"></div><div><div class="as-title">المساعد الصوتي</div><div class="as-status" id="assistantStatus">اسألني أي سؤال عن القدرات</div></div><button class="as-close" id="asClose">✕</button></div>
     <div class="chat-log" id="chatLog"></div><button class="btn wfull" id="convBtn" style="margin-bottom:10px">🎤 بدء المحادثة الصوتية</button>
@@ -201,7 +205,7 @@
     ['logoBox','logoBox2','logoBox3','assistantAvatar','profAv','profAv2'].forEach(id=>{const e=document.getElementById(id);if(e)injectLogo(e);});
     document.getElementById('fab').innerHTML='<svg viewBox="0 0 100 100" style="width:60%;height:60%" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="micg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fe3f0"/><stop offset="1" stop-color="#1565ff"/></linearGradient></defs><g stroke="url(#micg)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="37" y="14" width="26" height="44" rx="13"/><path d="M27 46 v4 a23 23 0 0 0 46 0 v-4"/><line x1="50" y1="73" x2="50" y2="85"/><line x1="36" y1="87" x2="64" y2="87"/></g></svg>';
     const sideNav=$('sideNav'),content=$('content'),placeholder=$('placeholder'),qcard=$('qcard'),checkbar=$('checkbar'),feedback=$('feedback'),fbTitle=$('fbTitle'),explanationAi=$('explanationAi'),
-      checkBtn=$('checkBtn'),prevBtn=$('prevBtn'),nextBtn=$('nextBtn'),qText=$('qText'),qLabel=$('qLabel'),qImg=$('qImg'),optsEl=$('opts'),qCounter=$('qCounter'),progressFill=$('progressFill'),topTitle=$('topTitle'),toastEl=$('toast'),fab=$('fab');
+      checkBtn=$('checkBtn'),prevBtn=$('prevBtn'),nextBtn=$('nextBtn'),qText=$('qText'),qLabel=$('qLabel'),qImg=$('qImg'),optsEl=$('opts'),qCounter=$('qCounter'),progressFill=$('progressFill'),topTitle=$('topTitle'),toastEl=$('toast'),fab=$('fab'),fabWrap=$('fabWrap');
     let curKey=null,curIndex=0,selected=null,answered=false,explainReq=0,currentUser='guest';
 
     // ===== persistent progress =====
@@ -264,8 +268,8 @@
     const modal=$('assistantModal');fab.addEventListener('click',()=>modal.classList.add('show'));$('asClose').addEventListener('click',()=>modal.classList.remove('show'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show');});
 
     (function(){const overlay=$('authOverlay'),landing=$('landingPanel'),loginP=$('loginPanel'),goLogin=$('goLoginBtn'),back=$('authBackBtn'),form=$('loginForm'),userI=$('authUser'),passI=$('authPass'),errEl=$('authError'),logout=$('logoutBtn'),appShell=$('appShell');const UK='qudraUsers',SK='qudraSession';const getU=()=>{try{return JSON.parse(localStorage.getItem(UK)||'{}');}catch(_){return{};}};
-      function enter(){currentUser=localStorage.getItem(SK)||'guest';loadStore();overlay.classList.add('hidden');appShell.classList.remove('hidden');fab.classList.remove('hidden');renderNav();updateProfile();}
-      function show(){overlay.classList.remove('hidden');landing.classList.remove('hidden');loginP.classList.add('hidden');appShell.classList.add('hidden');fab.classList.add('hidden');}
+      function enter(){currentUser=localStorage.getItem(SK)||'guest';loadStore();overlay.classList.add('hidden');appShell.classList.remove('hidden');fabWrap.classList.remove('hidden');renderNav();updateProfile();}
+      function show(){overlay.classList.remove('hidden');landing.classList.remove('hidden');loginP.classList.add('hidden');appShell.classList.add('hidden');fabWrap.classList.add('hidden');}
       if(localStorage.getItem(SK))enter();else show();
       goLogin.addEventListener('click',()=>{landing.classList.add('hidden');loginP.classList.remove('hidden');errEl.textContent='';userI.focus();});
       back.addEventListener('click',()=>{loginP.classList.add('hidden');landing.classList.remove('hidden');});
